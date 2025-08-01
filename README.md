@@ -2,10 +2,10 @@
 
 This repository contains all the working notes, logs, experiments, and readings related to my thesis. The structure is designed to be simple, clean, and scalable over time.
 
-## 📁 Directory Structure
+## Directory Structure
 ---
 
-## 🗓️ 00_Log/
+## 00_Log/
 **Purpose:** Time-based daily logs. One file per day, named as `YYYY-MM-DD.txt`.
 
 **Use cases:**
@@ -13,7 +13,7 @@ This repository contains all the working notes, logs, experiments, and readings 
 - Write open-ended thoughts or reflections
 - Link to deeper notes (see below)
 
-## 📚 01_Topics/
+## 01_Topics/
 **Purpose:** Topic-specific notes and summaries (e.g., “L1 cache behavior”, “Directory protocols”).
 
 Use when you want to:
@@ -25,7 +25,7 @@ File naming: use underscores for multiple words (e.g., `cache_hierarchy.md`)
 
 ---
 
-## 📄 02_Papers/
+## 02_Papers/
 **Purpose:** Notes from academic papers or books.
 
 Each file should contain:
@@ -38,7 +38,7 @@ Optional: start filenames with short tags, e.g., `HP_book_ch4.md`
 
 ---
 
-## 🧪 03_Experiments/
+## 03_Experiments/
 **Purpose:** Notes from experiments, simulations, benchmarks, and validation work.
 
 Each file should contain:
@@ -51,7 +51,7 @@ Prefix files with `exp_` (e.g., `exp_gem5_l1_latency.md`)
 
 ---
 
-## ✅ 04_Todo_Lists/
+## 04_Todo_Lists/
 **Purpose:** Track short- and long-term goals, and keep organized weekly plans.
 
 Suggested files:
@@ -59,7 +59,7 @@ Suggested files:
 - `long_term.md`: rough roadmap
 - `questions_for_advisor.md`: accumulate open questions
 
-- ## 🔖 Tips & Conventions
+## Tips & Conventions
 
 - Use links between files for cross-referencing (e.g., `See: ../02_Papers/MESI_paper.md`)
 - At the end of each week, write a short summary and reflect on what was learned.
