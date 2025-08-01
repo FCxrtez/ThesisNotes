@@ -65,6 +65,7 @@ Suggested files:
 - At the end of each week, write a short summary and reflect on what was learned.
 - Tag potentially useful writing material with `#writing_candidate` or `#figure_needed`.
 - File and folder naming conventions keep things sorted:
+
 -- **Dates:** YYYY-MM-DD.txt to ensure correct order.
 -- **Topics:** Use underscores and lowercase: gem5_coherence_analysis.txt
 -- **Experiments:** exp_[short_description].txt
