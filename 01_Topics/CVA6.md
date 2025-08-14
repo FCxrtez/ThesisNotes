@@ -4,3 +4,7 @@ CVA6 (formerly Ariane) [3] is a popular 64-bit RISC-V core with a six-stage pipe
 
 [link al repo de CVA6](https://github.com/openhwgroup/cva6)
 [repo manuel](https://github.com/gvodanovic/riscv-processor)
+
+
+Branch predictor: 
+    parece ser que tiene un branch predictor de 2 bits. A confirmar
