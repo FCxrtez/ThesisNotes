@@ -8,7 +8,7 @@ def csa_3to2(a, b, c):
     return save, carry
 
 
-def add_4_signed_mantissas(mantisas, bit_width=35):
+def add_4_signed_mantissas(mantisas, bit_width=36):
     """
     Simulates a 4-input CSA tree for signed numbers.
     Assumes inputs are integers representing two's complement mantissas.

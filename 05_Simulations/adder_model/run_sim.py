@@ -1,5 +1,5 @@
 from mod_sumador import main as exec_sim
-from pp_functions import float_to_bits, bits_to_float
+from pp_functions import bits_to_float
 from sim_monitor import SimMonitor
 import argparse
 import sys
@@ -43,8 +43,9 @@ def main():
     
     args = parse_arguments()
     debug_en = args.debug
+    assert_en = args.gen_assert_signals
 
-    monitor = SimMonitor(args.gen_assert_signals)
+    monitor = SimMonitor(assert_en)
 
     if (args.input_file): # Multiple inputs -> Multiple simulations
         try:

@@ -36,8 +36,8 @@ def gen_F(G, T, Z, V, bit_width):
 
         else:
             # General: f_i = T_i-1(G_i ~Z_i+1 + Z_i ~G_i+1) + ~T_i-1(Z_i ~Z_i+1 + G_i ~G_i+1)
-            term_T = t_prev & ((g_i & (z_next ^ 1)) | (z_i & (g_next ^ 1)))
-            term_not_T = (t_prev ^ 1) & ((z_i & (z_next ^ 1)) | (g_i & (g_next ^ 1)))
+            term_T = t_next & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
+            term_not_T = (t_next ^ 1) & ((z_i & (z_prev ^ 1)) | (g_i & (g_prev ^ 1)))
             f_i = term_T | term_not_T
 
 
@@ -52,6 +52,53 @@ def LZD(F, bit_width):
         else:
             break
     return count
+
+
+def pre_encoding(G, T, Z, V, bit_width = 36, monitor = None):
+    mask = (1 << (bit_width + 1)) - 1
+
+    # Agrandamos vectores ( G_n1 = [G, 0] )
+    G_n1      = G << 1
+    T_aligned = T | (V << bit_width)
+    Z_n1      = Z << 1
+
+
+    # Casos suma y resta con resultado positivo/negativo
+    # suma o resta con resultado positivo
+    G_Gp = G_n1 | V
+    Z_Gp = Z_n1 | (V ^ 1)
+    #resta - resultado negativo
+    G_Gn = G_n1 | 0 # si resNegativa -> G_-1 = 0, si suma -> G_-1 = 0
+    Z_Gn = Z_n1 | 1 # si resNegativa -> Z_-1 = 1, si suma -> Z_-1 = 1
+
+    # string resultado positivo
+    Gp_p = G_Gp # pues no cambia para suma o resta con resultado positivo, resta con res negativo no aplica
+    Gp_n = Z_Gp & T_aligned # Zi & T(i+1)
+    Gp_z = ~(Gp_p | Gp_n) & mask
+
+    # string resultado negativo
+    Gn_p = Z_Gn # si resNegativa -> Z_-1 = 0, si suma -> Z_-1 = 1
+    Gn_n = G_Gn & T_aligned # Gi & T(i+1)
+    Gn_z = ~(Gn_p | Gn_n) & mask
+
+    print("Pre-encoding:")
+    print(f"  Gp_p: {pp_bits_spaced(Gp_p, bit_width + 1)}")
+    print(f"  Gp_n: {pp_bits_spaced(Gp_n, bit_width + 1)}")
+    print(f"  Gp_z: {pp_bits_spaced(Gp_z, bit_width + 1)}\n")
+    print(f"  Gn_p: {pp_bits_spaced(Gn_p, bit_width + 1)}")
+    print(f"  Gn_n: {pp_bits_spaced(Gn_n, bit_width + 1)}")
+    print(f"  Gn_z: {pp_bits_spaced(Gn_z, bit_width + 1)}\n")
+    print("-" * 50 + "\n")
+
+    monitor.record("LZA_Gp_p", f"{pp_bits(Gp_p, bit_width + 1)}")
+    monitor.record("LZA_Gp_n", f"{pp_bits(Gp_n, bit_width + 1)}")
+    monitor.record("LZA_Gp_z", f"{pp_bits(Gp_z, bit_width + 1)}")
+
+    monitor.record("LZA_Gn_p", f"{pp_bits(Gn_p, bit_width + 1)}")
+    monitor.record("LZA_Gn_n", f"{pp_bits(Gn_n, bit_width + 1)}")
+    monitor.record("LZA_Gn_z", f"{pp_bits(Gn_z, bit_width + 1)}")
+
+    return (Gp_p, Gp_n, Gp_z), (Gn_p, Gn_n, Gn_z)
 
 def simulate_reduction_tree(leaf_nodes):
     current_layer = leaf_nodes
@@ -96,63 +143,15 @@ def simulate_reduction_tree(leaf_nodes):
 
                 next_layer.append((z_, p_, n_, y_))
 
-        print(f"Capa {capa}-esima:")
-        for i, node in enumerate(next_layer):
-            print(f"  Nodo {i}: {node}")
+        #print(f"Capa {capa}-esima:")
+        #for i, node in enumerate(next_layer):
+        #    print(f"  Nodo {i}: {node}")
         current_layer = next_layer
 
 
     return current_layer[0]
 
-def pre_encoding(G, T, Z, V, bit_width, monitor = None):
-    mask = (1 << (bit_width + 1)) - 1
-
-    # Agrandamos vectores ( G_n1 = [G, 0] )
-    G_n1 = G << 1
-    T_aligned = T | (V << bit_width)
-    Z_n1 = Z << 1
-
-
-    # Casos suma y resta con resultado positivo/negativo
-    # suma o resta con resultado positivo
-    G_Gp = G_n1 | V
-    Z_Gp = Z_n1 | (V ^ 1)
-    #resta - resultado negativo
-    G_Gn = G_n1 | 0 # si resNegativa -> G_-1 = 0, si suma -> G_-1 = 0
-    Z_Gn = Z_n1 | 1 # si resNegativa -> Z_-1 = 1, si suma -> Z_-1 = 1
-
-    # string resultado positivo
-    Gp_p = G_Gp # pues no cambia para suma o resta con resultado positivo, resta con res negativo no aplica
-    Gp_n = Z_Gp & T_aligned # Zi & T(i+1)
-    Gp_z = ~(Gp_p | Gp_n) & mask
-
-    # string resultado negativo
-    Gn_p = Z_Gn # si resNegativa -> Z_-1 = 0, si suma -> Z_-1 = 1
-    Gn_n = G_Gn & T_aligned # Gi & T(i+1)
-    Gn_z = ~(Gn_p | Gn_n) & mask
-
-
-    print("Pre-encoding:")
-    print(f"  Gp_p: {pp_bits_spaced(Gp_p, bit_width + 1)}")
-    print(f"  Gp_n: {pp_bits_spaced(Gp_n, bit_width + 1)}")
-    print(f"  Gp_z: {pp_bits_spaced(Gp_z, bit_width + 1)}\n")
-    print(f"  Gn_p: {pp_bits_spaced(Gn_p, bit_width + 1)}")
-    print(f"  Gn_n: {pp_bits_spaced(Gn_n, bit_width + 1)}")
-    print(f"  Gn_z: {pp_bits_spaced(Gn_z, bit_width + 1)}\n")
-    print("-" * 50 + "\n")
-
-    monitor.record("LZA_Gp_p", f"{pp_bits(Gp_p, 36)}")
-    monitor.record("LZA_Gp_n", f"{pp_bits(Gp_n, 36)}")
-    monitor.record("LZA_Gp_z", f"{pp_bits(Gp_z, 36)}")
-
-    monitor.record("LZA_Gn_p", f"{pp_bits(Gn_p, 36)}")
-    monitor.record("LZA_Gn_n", f"{pp_bits(Gn_n, 36)}")
-    monitor.record("LZA_Gn_z", f"{pp_bits(Gn_z, 36)}")
-
-    return (Gp_p, Gp_n, Gp_z), (Gn_p, Gn_n, Gn_z)
-
-
-def error_detection(Gp, Gn, V, Z_n1, bit_width):
+def error_detection(Gp, Gn, V, Z_n1, bit_width=36):
     # Primero generamos los vectores para cada nodo de cada arbol
     inp_nodes_pos, inp_nodes_neg = [], []
     for i in range(bit_width + 1):
@@ -163,13 +162,13 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width):
     assert(len(inp_nodes_pos) == bit_width + 1)
     assert(len(inp_nodes_neg) == bit_width + 1)
     
-    print("   " + "-" * 25 + "\n")
-    print("Reduccion arbol para resultado positivo:")
+    #print("   " + "-" * 25 + "\n")
+    #print("Reduccion arbol para resultado positivo:")
     root_pos = simulate_reduction_tree(inp_nodes_pos)
-    print("   " + "-" * 25 + "\n")
-    print("Reduccion arbol para resultado negativo:")
+    #print("   " + "-" * 25 + "\n")
+    #print("Reduccion arbol para resultado negativo:")
     root_neg = simulate_reduction_tree(inp_nodes_neg)
-    print("   " + "-" * 25 + "\n")
+    #print("   " + "-" * 25 + "\n")
 
 
     P_p, N_p, Y_p = root_pos[1], root_pos[2], root_pos[3]
@@ -182,7 +181,7 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width):
 
     return X, Y
 
-def LZA(a, b, signos, bit_width=35, monitor = None):
+def LZA(a, b, signos, bit_width=36, monitor = None):
     """
     Simulates a Leading Zero Anticipator (LZA) with concurrent error detection.
     """
@@ -204,7 +203,7 @@ def LZA(a, b, signos, bit_width=35, monitor = None):
     print(f"  T: {pp_bits_spaced(T, bit_width)}")
     print(f"  G: {pp_bits_spaced(G, bit_width)}")
     print(f"  Z: {pp_bits_spaced(Z, bit_width)}\n")
-    print(f" flag V: {V} -> {'eff Substraction' if V else 'eff Addition'} \n ")
+    print(f"  flag V: {V} -> {'eff Substraction' if V else 'eff Addition'} \n ")
 
     F = gen_F(G, T, Z, V, bit_width)
 
@@ -229,4 +228,4 @@ def LZA(a, b, signos, bit_width=35, monitor = None):
     print(f"  Señal de error Y (one bit less): {Y}")
     print("\n" + "-" * 50 + "\n")
 
-    return zeroes, X, Y
+    return zeroes, X, Y, V

@@ -14,7 +14,7 @@ class SimMonitor:
             ("mantisas",                 "adata_mantisas.txt"): [],
             ("implicit_mantisas",        "adata_implicit_mantisas.txt"): [],
             ("shifts",                   "adata_shifts.txt"): [],
-            ("is_max",                   "adata_is_max"): [],
+            ("is_max",                   "adata_is_max.txt"): [],
             ("xor_signs",                "adata_xor_signs.txt"): [],
             ("aligned_mantisas",         "adata_aligned_mantissas.txt"): [],
             ("sticky_bits",              "adata_sticky_bits.txt"): [],
@@ -38,6 +38,13 @@ class SimMonitor:
             ("is_sum_negative",          "adata_is_sum_negative.txt"): [],
             ("final_sign",               "adata_final_sign.txt"): [],
             ("max_exp",                  "adata_max_exp.txt"): [],
+            ("exp_post_norm",            "adata_exp_post_norm.txt"): [],
+            ("FTZ",                      "adata_FTZ.txt"): [],
+            ("inf_result",               "adata_inf_result.txt"): [],
+            ("abs_rounded",              "adata_abs_rounded.txt"): [],
+            ("round_ovf",                "adata_round_ovf.txt"): [],
+            ("rounded_sign",             "adata_rounded_sign.txt"): [],
+            ("exact_zero",               "adata_exact_zero.txt"): [],
             ("final_exp",                "adata_final_exp.txt"): [],
             ("output",                   "adata_output.txt"): []
         }
@@ -71,7 +78,6 @@ class SimMonitor:
     def assert_data(self):
         
         data_length = len(self.a_signal_file_data[('V', "adata_V.txt")])
-        #print(self.a_signal_file_data)
         for data in list(self.a_signal_file_data.values()):
-            #print(data, len(data), data_length)
+            
             assert(data_length == len(data))

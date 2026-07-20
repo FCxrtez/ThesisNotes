@@ -53,7 +53,7 @@ def exp_align(e):
 def twos_complement(a_mantisas, signos, bit_mask=33):
     twos_complement_mantisas = []
 
-    precision_w_ovf = bit_mask + 2
+    precision_w_ovf = bit_mask + 3
     mask_w_ovf = (1 << precision_w_ovf) - 1
 
     for am, s in zip(a_mantisas, signos):
@@ -71,7 +71,7 @@ def twos_complement(a_mantisas, signos, bit_mask=33):
 
         print(f"Signo: {s}")
         print(f"Mantisa original:\n      {pp_bits_spaced(am, bit_mask)}")
-        print(f"Complemento a dos con ovf: \n    {pp_bits_spaced(twos_comp, precision_w_ovf)}\n")
+        print(f"Complemento a dos con ovf: \n   {pp_bits_spaced(twos_comp, precision_w_ovf)}\n")
 
     print("\n" + "-" * 50 + "\n")
     return twos_complement_mantisas
