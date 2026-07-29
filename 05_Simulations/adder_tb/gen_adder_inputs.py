@@ -45,7 +45,7 @@ def gen_inputs(num_inputs=100):
 
 def gen_inputs_uint16(num_inputs=100):
     rng = np.random.default_rng(seed=2026)
-    rnd_array = rng.integers(low=0, high=65536, size=num_inputs, dtype=np.uint16)
+    rnd_array = rng.integers(low=0, high=65536, size=num_inputs, dtype=np.uint16, endpoint=False)
 
     #array_as_fp16 = rnd_array.view(dtype=np.float16)
 
@@ -54,7 +54,7 @@ def gen_inputs_uint16(num_inputs=100):
     return hex_array
 
 
-if __name__ == '__main__':
+def main(N = None):
     parser = argparse.ArgumentParser(description="Generate random inputs for an FP16 adder testbench",
                                       usage="python3 gen_adder_inputs.py [inp0 inp1 inp2 inp3]")
     
@@ -73,7 +73,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.num < 0 or args.num % 4 !=0:
+    i_num = args.num if N is None else N
+    i_num = i_num*4
+
+    if i_num < 0 or i_num % 4 != 0:
         print("Error: --num must be a positive integer and a multiple of 4")
         exit(1)
     F = gen_file()
@@ -95,9 +98,12 @@ if __name__ == '__main__':
             F.write(f"{inp}")
             
     else:
-        gen_inp = gen_inputs_uint16(args.num)
+        gen_inp = gen_inputs_uint16(i_num)
         print(f"Writing {len(gen_inp)} random inputs to file...")
         for i, inp in enumerate(gen_inp):
             if (i % 4 == 0) and (i != 0):
                 F.write("\n") # 64 bit vectors -> 4 inputs per line
             F.write(f"{inp}")
+
+if __name__ == '__main__':
+    main()
