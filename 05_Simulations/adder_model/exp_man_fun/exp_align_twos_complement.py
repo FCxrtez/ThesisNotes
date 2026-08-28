@@ -1,5 +1,5 @@
 from math import copysign
-from pp_functions.pp_functions import pp_bits, pp_bits_spaced
+from ..pp_functions.pp_functions import pp_bits, pp_bits_spaced
 
 def exp_align(e):
     shifts = [0] * 4

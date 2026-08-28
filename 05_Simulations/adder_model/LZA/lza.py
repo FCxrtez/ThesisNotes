@@ -1,4 +1,4 @@
-from pp_functions.pp_functions import pp_bits_spaced, pp_bits
+from ..pp_functions.pp_functions import pp_bits_spaced, pp_bits
 
 
 def get_bit(value, index):

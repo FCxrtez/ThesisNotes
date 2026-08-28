@@ -1,4 +1,4 @@
-from pp_functions.pp_functions import pp_bits_spaced
+from ..pp_functions.pp_functions import pp_bits_spaced
 
 
 def csa_3to2(a, b, c):

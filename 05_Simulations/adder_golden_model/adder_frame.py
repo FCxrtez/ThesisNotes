@@ -9,12 +9,12 @@ if str(ROOT) not in sys.path:
 from adder_model.pp_functions import float_to_bits, pp_bits
 
 class AdderFrame:
-    add_results = []
     output_dir = '/home/fran/tesis/ThesisNotes/05_Simulations/adder_tb'
 
     def __init__(self, fn, intermediate_dtype=np.float16):
         self.output_file = fn
         self.intermediate_dtype = intermediate_dtype
+        self.add_results = []
 
     def exec_fused_sum(self, i1, i2, i3, i4):
         """
@@ -22,12 +22,13 @@ class AdderFrame:
         then casts the final result back to FP16.
         """
 
-        operands = np.array([i1, i2, i3, i4], dtype=self.intermediate_dtype)
-
-        total_sum = np.sum(operands, dtype=self.intermediate_dtype)
+        # Cast to intermediate precision
+        round1 = np.add(i1    , i2, dtype=self.intermediate_dtype)
+        round2 = np.add(round1, i3, dtype=self.intermediate_dtype)
+        round3 = np.add(round2, i4, dtype=self.intermediate_dtype)
 
         # Cast back to original dtype, "packing" of result 
-        packed_result = np.float16(total_sum)
+        packed_result = np.float16(round3)
 
         self.add_results.append(packed_result)
 
@@ -40,7 +41,6 @@ class AdderFrame:
 
         with open(filepath, 'w') as f:
             for result in self.add_results:
-                bin_result = str(float_to_bits(result))
                 print(f"Writing {result} to file...")
                 f.write(f"{pp_bits(float_to_bits(result), 16)}\n")
 

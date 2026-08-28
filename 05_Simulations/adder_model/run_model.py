@@ -1,6 +1,6 @@
-from mod_sumador import main as exec_sim
-from pp_functions import bits_to_float
-from sim_monitor import SimMonitor
+from .mod_sumador import main as exec_sim
+from .pp_functions import bits_to_float
+from .sim_monitor import SimMonitor
 import argparse
 import sys
 import os
@@ -39,7 +39,7 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def main():
+def adder_model(inp_file=None):
     
     args = parse_arguments()
     debug_en = args.debug
@@ -47,13 +47,14 @@ def main():
 
     monitor = SimMonitor(assert_en)
 
-    if (args.input_file): # Multiple inputs -> Multiple simulations
+    if (args.input_file or inp_file): # Multiple inputs -> Multiple simulations
+        file_path = args.input_file if inp_file is None else inp_file
         try:
-            with open(args.input_file, 'r') as f:
+            with open(file_path, 'r') as f:
                 # each line contains 64 bits of data -> 4 FP16 operands
                 lines = f.readlines()
         except FileNotFoundError:
-            print(f"ERROR: Could not find input file @ {args.input_file}")
+            print(f"ERROR: Could not find input file @ {file_path}")
             exit(1)
 
         # Silence simulation output to terminal
@@ -91,4 +92,4 @@ def main():
 
 
 
-if __name__ == "__main__":   main()
+if __name__ == "__main__":   adder_model()

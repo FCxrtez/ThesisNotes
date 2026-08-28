@@ -2,7 +2,11 @@ import numpy as np
 import argparse
 import sys
 from pathlib import Path
-from adder_frame import AdderFrame
+
+try:
+    from .adder_frame import AdderFrame
+except ImportError:
+    from adder_frame import AdderFrame
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -24,20 +28,21 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def main(Input_file):
+def adder_golden_model(Input_file=None):
     args = parse_arguments()
 
     fp16_adder = AdderFrame("fp16_ref.txt", intermediate_dtype=np.float16)
     fp32_adder = AdderFrame("fp32_ref.txt", intermediate_dtype=np.float32)
     fp64_adder = AdderFrame("fp64_ref.txt", intermediate_dtype=np.float64)
 
-    if (args.input_file): # Multiple inputs -> Multiple simulations
+    if (args.input_file or Input_file): # Multiple inputs -> Multiple simulations
+        file_path = args.input_file if Input_file is None else Input_file
         try:
-            with open(args.input_file, 'r') as f:
+            with open(file_path, 'r') as f:
                 # each line contains 64 bits of data -> 4 FP16 operands
                 lines = f.readlines()
         except FileNotFoundError:
-            print(f"ERROR: Could not find input file @ {args.input_file}")
+            print(f"ERROR: Could not find input file @ {file_path}")
             exit(1)
 
         for line in lines:
@@ -75,4 +80,4 @@ def main(Input_file):
     fp64_adder.write_to_file()
 
 if __name__ == "__main__":
-    main()
+    adder_golden_model()
