@@ -4,3 +4,5 @@ __pycache__/
 
 # Ignore text files in simulation directory
 05_Simulations/adder_tb/*.txt
+05_Simulations/adder_tb/adder_FP16_inputs.txt
+05_Simulations/adder_tb/adder_FP16_inputs.txt
