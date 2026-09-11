@@ -29,7 +29,10 @@ def parse_arguments():
     return parser.parse_args()
 
 def adder_golden_model(Input_file=None):
-    args = parse_arguments()
+    if Input_file is not None:
+        args = argparse.Namespace(input_file=Input_file)
+    else:
+        args = parse_arguments()
 
     fp16_adder = AdderFrame("fp16_ref.txt", intermediate_dtype=np.float16)
     fp32_adder = AdderFrame("fp32_ref.txt", intermediate_dtype=np.float32)

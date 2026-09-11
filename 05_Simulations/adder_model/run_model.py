@@ -40,10 +40,26 @@ def parse_arguments():
     return parser.parse_args()
 
 def adder_model(inp_file=None):
-    
-    args = parse_arguments()
-    debug_en = args.debug
-    assert_en = args.gen_assert_signals
+
+    if inp_file is "error_vectors.txt":
+        args = argparse.Namespace(
+            input_file=inp_file,
+            output_file=None,
+            gen_assert_signals=False,
+            debug=True,
+        )
+    elif inp_file is not None:
+        args = argparse.Namespace(
+            input_file=inp_file,
+            output_file=None,
+            gen_assert_signals=True,
+            debug=False,
+        )
+    else:
+        args = parse_arguments()
+
+    debug_en = getattr(args, "debug", False)
+    assert_en = getattr(args, "gen_assert_signals", False)
 
     monitor = SimMonitor(assert_en)
 
@@ -57,24 +73,44 @@ def adder_model(inp_file=None):
             print(f"ERROR: Could not find input file @ {file_path}")
             exit(1)
 
-        # Silence simulation output to terminal
+        # Silence only the extra debug chatter while preserving later bench output.
         if not debug_en:
-            sys.stdout = open(os.devnull, 'w')
+            original_stdout = sys.stdout
+            devnull = open(os.devnull, 'w')
+            try:
+                sys.stdout = devnull
+                for line in lines:
+                    # remove whitespaces and EOL characters
+                    clean_line = line.strip()
 
-        for line in lines:
-            # remove whitespaces and EOL characters
-            clean_line = line.strip()
+                    assert(clean_line) # line isn't empty
 
-            assert(clean_line) # line isn't empty
+                    operands_bits = list(int(clean_line[i: i+4], 16) for i in range(0, 16, 4))
 
-            operands_bits = list(int(clean_line[i: i+4], 16) for i in range(0, 16, 4))
+                    num1 = bits_to_float(operands_bits[0])
+                    num2 = bits_to_float(operands_bits[1])
+                    num3 = bits_to_float(operands_bits[2])
+                    num4 = bits_to_float(operands_bits[3])
 
-            num1 = bits_to_float(operands_bits[0])
-            num2 = bits_to_float(operands_bits[1])
-            num3 = bits_to_float(operands_bits[2])
-            num4 = bits_to_float(operands_bits[3])
+                    exec_sim(num1, num2, num3, num4, monitor)
+            finally:
+                sys.stdout = original_stdout
+                devnull.close()
+        else:
+            for line in lines:
+                # remove whitespaces and EOL characters
+                clean_line = line.strip()
 
-            exec_sim(num1, num2, num3, num4, monitor)
+                assert(clean_line) # line isn't empty
+
+                operands_bits = list(int(clean_line[i: i+4], 16) for i in range(0, 16, 4))
+
+                num1 = bits_to_float(operands_bits[0])
+                num2 = bits_to_float(operands_bits[1])
+                num3 = bits_to_float(operands_bits[2])
+                num4 = bits_to_float(operands_bits[3])
+
+                exec_sim(num1, num2, num3, num4, monitor)
 
     else:
         # single input -> single simulation

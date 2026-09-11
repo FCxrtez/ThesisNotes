@@ -1,7 +1,7 @@
 from .adders import add_4_signed_mantissas, ripple_carry_adder
 from .LZA import LZA
 from .pp_functions import pp_bits, pp_bits_bus, pp_bits_spaced, pp_hex, float_to_bits, bits_to_float
-from .info import Info
+from .info import Info, special_cases_handling
 from .exp_man_fun import exp_align, twos_complement
 from .rounding import round
 
@@ -184,39 +184,40 @@ def main(num1, num2, num3, num4, monitor = None):
     # Normalizacion, calculo de signo y exponente final
     # ------------------------
 
-    is_sum_negative = (suma_mantisas >> ((3 * PRECISION_BITS) + 2)) & 0x1 # bit de overflow mas significativo indica el signo del resultado final
-    final_sign = pivot ^ is_sum_negative
+    is_sum_negative = (suma_mantisas >> ((3 * PRECISION_BITS) + 2)) & 0x1 
+    final_sign      = pivot ^ is_sum_negative
 
     monitor.record("is_sum_negative", f"{pp_bits(is_sum_negative, 1)}")
     monitor.record("final_sign",      f"{pp_bits(final_sign, 1)}")
 
     if (is_sum_negative):
-        abs_suma_mantissas = ((~suma_mantisas) & ((1 << ((3 * PRECISION_BITS) + 3)) - 1)) + 1 # complemento a dos para obtener el valor absoluto
+        abs_suma_mantissas = ((~suma_mantisas) & ((1 << ((3 * PRECISION_BITS) + 3)) - 1)) + 1
     else:
         abs_suma_mantissas = suma_mantisas
     
-    max_exp = exponentes[shifts.index(0)]
     enable_flush = False
+    max_exp = exponentes[shifts.index(0)]
+    eff_exp = max_exp if max_exp > 0 else 1
 
-    if max_exp == 0:
-        # Numero subnormal, no podemos shiftear
-        shift_amount = 0
-        exp_post_norm = 0
+    tentative_exp = eff_exp + 3 - actual_lzcounter
 
-    elif actual_lzcounter < max_exp:
-        # Numero normal, podemos shiftear todos los ceros fuera de mantisa
+    if tentative_exp >= 1:
+        # resultado normal
         shift_amount = actual_lzcounter
-        exp_post_norm = max_exp + 3 - actual_lzcounter
-    
+        exp_post_norm = tentative_exp
+        enable_flush = False
+
     else:
-        # Numero normal a numero subnormal
-        if (FTZ_EN):
+        # resultado subnormal o cero
+        if FTZ_EN:
             enable_flush = True
+            shift_amount = 0
+            exp_post_norm = 0
+
         else:
-            # Shifteamos los ceros que nos permita el exponente antes de ser subnormal
-            shift_amount = max_exp - 1
             enable_flush = False
-        exp_post_norm = 0
+            exp_post_norm = 0
+            shift_amount = eff_exp + 3 - 1
 
     if enable_flush:
         normalized_mantisa = 0
@@ -252,8 +253,8 @@ def main(num1, num2, num3, num4, monitor = None):
 
     # 7FE000000 = descartamos el primer bit (un 1) normalizado, nos quedamos con los siguientes 10 bits
     abs_val_masked = (normalized_mantisa & 0x7FE000000) >> 25
-    g_bit = (normalized_mantisa & 0x001000000)>> 24
-    s_bit = 1 if (normalized_mantisa & 0x000FFFFFF) > 0 else 0
+    g_bit          = (normalized_mantisa & 0x001000000)>> 24
+    s_bit          = 1 if (normalized_mantisa & 0x000FFFFFF) > 0 else 0
 
     # or the sticky bits generated when aligning and the one of the normalized value
     RS_bits = (g_bit << 1) | (s_bit | any(sticky_bits))
@@ -278,39 +279,28 @@ def main(num1, num2, num3, num4, monitor = None):
 
     result_is_inf = exp_final > 30
 
-    monitor.record("abs_rounded", f"{pp_bits(abs_rounded, 10)}")
-    monitor.record("round_ovf", f"{pp_bits(round_ovf, 1)}")
-    monitor.record("rounded_sign", f"{pp_bits(rounded_sign, 1)}")
-    monitor.record("exact_zero", f"{pp_bits(exact_zero, 1)}")
-    monitor.record("inf_result", f"{pp_bits(result_is_inf, 1)}")
+    monitor.record("abs_rounded", f"{        pp_bits(abs_rounded, 10)  }")
+    monitor.record("round_ovf", f"{          pp_bits(round_ovf, 1)     }")
+    monitor.record("rounded_sign", f"{       pp_bits(rounded_sign, 1)  }")
+    monitor.record("exact_zero", f"{         pp_bits(exact_zero, 1)    }")
+    monitor.record("inf_result", f"{         pp_bits(result_is_inf, 1) }")
 
     print("Pre-redondeo:")
-    print(f"    mantisa abs: {pp_bits_spaced(abs_val_masked, 10)}")
-    print(f"    Round/Sticky bits: {pp_bits(RS_bits, 2)}")
+    print(f"    mantisa abs: {               pp_bits_spaced(abs_val_masked, 10) }")
+    print(f"    Round/Sticky bits: {         pp_bits(RS_bits, 2)                }")
     print("Post-redondeo:")
-    print(f"    mantisa redondeada: {pp_bits_spaced(abs_rounded, 10)}")
-    print(f"    ovf por redondeo (bit 11): {pp_bits(round_ovf, 1)}")
-    print(f"    signo redondeado: {pp_bits(rounded_sign, 1)}")
-    print(f"    cero exacto: {True if exact_zero else False}")
-    print(f"    Result is inf: {True if result_is_inf else False}")
+    print(f"    mantisa redondeada: {        pp_bits_spaced(abs_rounded, 10)  }")
+    print(f"    ovf por redondeo (bit 11): { pp_bits(round_ovf, 1)            }")
+    print(f"    signo redondeado: {          pp_bits(rounded_sign, 1)         }")
+    print(f"    cero exacto: {               True if exact_zero else False    }")
+    print(f"    Result is inf: {             True if result_is_inf else False }")
 
     print("\n"+"-"*50+"\n")
 
     # ------------------------
     # casos especiales 
     # ------------------------
-    any_NaN = any(info.is_nan for info in nums_info)
-    any_inf = any(info.is_inf for info in nums_info)
-    resultado_especial = None
-    if any_NaN:
-        resultado_especial = "NaN"
-    elif any_inf:
-        if any_inf and any(info.is_inf and info.signo != signos[0] for info in nums_info):
-            resultado_especial = "NaN" # Inf + (-Inf) = NaN
-        else:
-            resultado_especial = "Inf"
-    elif result_is_inf:
-        abs_rounded = 0
+    special_cases_result = special_cases_handling(nums_info)
 
     # ------------------------
     # packing y generacion de resultado final
@@ -320,22 +310,12 @@ def main(num1, num2, num3, num4, monitor = None):
     result |= (exp_final & 0x1F)<< MAN_BITS
     result |= (abs_rounded & 0x3FF)
 
-    monitor.record("output", f"{pp_bits(result, 16)}")
 
-    if(resultado_especial != None):
-        print(f"El resultado es especial: {resultado_especial}")
-        if resultado_especial == "NaN":
-            # En RISC-V, NaN se representa con el exponente al máximo y una mantisa no nula. El bit más significativo de la mantisa determina si es un NaN silencioso (quiet) o señalante (signalling).
-            # Para un NaN silencioso, el bit más significativo de la mantisa es 1, y para un NaN señalante es 0.
-            # Aquí podríamos decidir arbitrariamente usar un NaN silencioso para representar cualquier resultado NaN, o podríamos intentar preservar el tipo de NaN si es que uno de los operandos era un NaN señalante.
-            if any(info.is_signalling for info in nums_info):
-                # Si hay al menos un NaN señalante, podríamos optar por devolver un NaN señalante.
-                resultado = 0x7E00  # Exponente máximo (0x1F) y mantisa con el bit más significativo en 0 (señalante)
-            else:
-                # Si no hay NaN señalante, devolvemos un NaN silencioso.
-                resultado = 0x7F00  # Exponente máximo (0x1F) y mantisa con el bit más significativo en 1 (silencioso)
-        elif resultado_especial == "Inf":
-            resultado = 0
+    if(special_cases_result != None):
+        print(f"Resultado especial:")
+        print(f"    Resultado empaquetado: {pp_bits(special_cases_result,16)}")
+        print(f"    Con valor de {bits_to_float(special_cases_result)}")
+        result = special_cases_result
     else:
         print(f"Resultado normal:")
         print(f"    signo final: {rounded_sign}")
@@ -349,5 +329,6 @@ def main(num1, num2, num3, num4, monitor = None):
         print(f"{bits_to_float(binary_nums[0])} + {bits_to_float(binary_nums[1])} + {bits_to_float(binary_nums[2])} + {bits_to_float(binary_nums[3])} = {bits_to_float(result)}")
         print("\n" + "-"*50 + "\n")
         
+    monitor.record("output", f"{pp_bits(result, 16)}")
 
 if __name__ == "__main__":    main()

@@ -44,12 +44,15 @@ def gen_align_stress_vec(rng, mode):
         exp_small   = rng.integers(0,   6, size=1, dtype=np.uint16)
         exps        = np.concatenate((exp_large, exp_small))
 
-    rng.shuffle(exps)
+    exps.sort()
+    # Force adding the largest with the smallest, so rounding discards information
+    exps_sorted = np.array([exps[3], exps[0], exps[1], exps[2]])
+
     signs    = rng.integers(0,    2, size=4, dtype=np.uint16)
     mantisas = rng.integers(0, 1024, size=4, dtype=np.uint16)
 
     # Generamos numeros de 16 bits para que bits sea un array de 4 elementos de 16 bits
-    bits     = (signs << 15) | (exps << 10) | mantisas
+    bits     = (signs << 15) | (exps_sorted << 10) | mantisas
     return bits.view(np.uint16)
 
 
@@ -86,13 +89,14 @@ def gen_transition_vec(rng, mode):
     return float16_operands.view(np.uint16)
 
 
-def gen_test_vectors(N: int, seed=1):
+def gen_test_vectors(N: int, seed=1, verbose=True):
     rng = np.random.default_rng(seed=seed)
     test_suite, test_case = [], []
 
-    if ( N <= 10):
+    if ( N <= 10 ):
         N = N * 10
-        print(f"[INFO] Generating {N} cases, must be at least 10")
+        if verbose:
+            print(f"[INFO] Generating {N} cases, must be at least 10")
 
     rnd_uniform_p                   =     0.4
     aling_stress_p                  =     0.2
@@ -130,9 +134,10 @@ def gen_test_vectors(N: int, seed=1):
                     vec  = gen_transition_vec( rng, mode )
                 bucket = bucket + '_' + mode
 
-        print(f"Case: {bucket},")
-        for i, v in enumerate(vec):
-            print(f"\t{i}th elem: {v:04x} ({v.view(np.float16)})")       
+        if verbose:
+            print(f"Case: {bucket},")
+            for i, v in enumerate(vec):
+                print(f"\t{i}th elem: {v:04x} ({v.view(np.float16)})")       
 
         test_suite.append(vec)
         test_case.append(bucket)
@@ -140,7 +145,7 @@ def gen_test_vectors(N: int, seed=1):
     return np.array(test_suite), test_case
 
 
-def main(N = None):
+def main(N = None, *, verbose: bool = False):
 
     parser = argparse.ArgumentParser(description="Generate random inputs for an FP16 adder testbench",
                                      usage="python3 gen_adder_inputs.py [inp0 inp1 inp2 inp3]")
@@ -165,13 +170,15 @@ def main(N = None):
     if args.inputs:
 
         float_inp = [float(x) for x in args.inputs]
-        print(f"User provided inputs: {float_inp}")
+        if verbose:
+            print(f"User provided inputs: {float_inp}")
 
         np_floats = np.array(float_inp).astype(np.float16)
         np_bits = np_floats.view(dtype=np.uint16)
 
         hex_inp = [f"{b:04x}" for b in np_bits]
-        print(f"Writing {hex_inp} to file...")
+        if verbose:
+            print(f"Writing {hex_inp} to file...")
 
         for i, inp in enumerate(hex_inp):
             if (i % 4 == 0) and (i != 0):
@@ -179,9 +186,10 @@ def main(N = None):
             F.write(f"{inp}")
 
     else:
-        generated_inp, generated_cases = gen_test_vectors(i_num)
+        generated_inp, generated_cases = gen_test_vectors(i_num, verbose=verbose)
 
-        print(f"Writing {len(generated_inp)} random inputs to file...")
+        if verbose:
+            print(f"Writing {len(generated_inp)} random inputs to file...")
 
         for inp, case in zip(generated_inp, generated_cases):
             for val in inp:

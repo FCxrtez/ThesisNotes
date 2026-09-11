@@ -41,7 +41,6 @@ class AdderFrame:
 
         with open(filepath, 'w') as f:
             for result in self.add_results:
-                print(f"Writing {result} to file...")
                 f.write(f"{pp_bits(float_to_bits(result), 16)}\n")
 
         print(f"Expected results written to {self.output_file}")
