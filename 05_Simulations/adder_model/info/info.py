@@ -1,7 +1,9 @@
-def special_cases_handling(nums_info):
+def special_cases_handling(nums_info, result_is_inf, result_sign):
     """
     Args:
         nums_info (list[Info]): List of info objects
+        result_is_inf (bool): Whether the result is infinity
+        result_sign (int): The sign of the result
     """
     canonical_qnan_bin  = 0x7E00
     pos_inf             = 0x7C00
@@ -18,9 +20,9 @@ def special_cases_handling(nums_info):
     if has_pos_inf and has_neg_inf:
         # +inf + -inf = NaN
         return canonical_qnan_bin
-    elif has_pos_inf:
+    elif has_pos_inf or (result_is_inf and not result_sign):
         return pos_inf
-    elif has_neg_inf:
+    elif has_neg_inf or (result_is_inf and result_sign):
         return neg_inf
 
     return None  # No special case detected

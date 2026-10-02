@@ -63,17 +63,16 @@ class SimMonitor:
         
     def write_data(self):
         self.assert_data()
-        for ((_ , filename), data) in self.a_signal_file_data.items():
+        if self.gen_assert:
+            for ((_ , filename), data) in self.a_signal_file_data.items():
 
-            filepath = os.path.join(self.output_dir, filename)
-            if self.gen_assert:
+                filepath = os.path.join(self.output_dir, filename)
                 with open(filepath, 'w') as fd:
-
                     for sim_signal in data:
                     
                         fd.write(f"{sim_signal}\n")
 
-            else: print("INFO: No assertion signals generated\n")
+        else: print("INFO: No assertion signals generated\n:")
 
     def assert_data(self):
         

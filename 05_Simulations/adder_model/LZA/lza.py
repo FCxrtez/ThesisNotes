@@ -29,14 +29,14 @@ def gen_F(G, T, Z, V, bit_width):
 
         elif i == bit_width - 1:
             # MSB: f_n-1 = V(G_n-1 ~Z_n-2 + Z_n-1 ~G_n-2) + ~V(Z_n-1 ~Z_n-2 + ~Z_n-1)
-            term_V = V & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
+            term_V     = V       & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
             term_not_V = (V ^ 1) & ((z_i & (z_prev ^ 1)) | (z_i ^ 1))
             f_i = term_V | term_not_V
 
 
         else:
             # General: f_i = T_i-1(G_i ~Z_i+1 + Z_i ~G_i+1) + ~T_i-1(Z_i ~Z_i+1 + G_i ~G_i+1)
-            term_T = t_next & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
+            term_T     = t_next       & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
             term_not_T = (t_next ^ 1) & ((z_i & (z_prev ^ 1)) | (g_i & (g_prev ^ 1)))
             f_i = term_T | term_not_T
 
@@ -181,9 +181,9 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width=36):
 
     return X, Y
 
-def LZA(a, b, signos, bit_width=36, monitor = None):
+def LZA(carry, save, signos, bit_width=36, monitor = None):
     """
-    Simulates a Leading Zero Anticipator (LZA) with concurrent error detection.
+    Simulates carry Leading Zero Anticipator (LZA) with concurrent error detection.
     """
     if all(signos) or all(map(lambda s: 0 if s == 1 else 1, signos)):
         V = False
@@ -192,11 +192,9 @@ def LZA(a, b, signos, bit_width=36, monitor = None):
 
     monitor.record("V", f"{pp_bits(V, 1)}")
 
-    c = b
-
-    T = a ^ c
-    G = a & c
-    Z = int(~(a | c))
+    T = carry ^ save
+    G = carry & save
+    Z = int(~(carry | save))
 
 
     print("LZA:")

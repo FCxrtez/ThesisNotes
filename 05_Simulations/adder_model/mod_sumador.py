@@ -12,7 +12,7 @@ from .rounding import round
 MAN_BITS = 10
 EXP_BITS = 5
 PRECISION_BITS = MAN_BITS + 1
-FTZ_EN = 1
+FTZ_EN = 0
 
 def main(num1, num2, num3, num4, monitor = None):
     """
@@ -148,7 +148,6 @@ def main(num1, num2, num3, num4, monitor = None):
     
     print("\n"+"-"*50+"\n")
 
-    # Generar vectores carry y save para LZA
     save, carry = add_4_signed_mantissas(mantisas_twos_complement_w_ovf, (3 * PRECISION_BITS) + 3)
 
     monitor.record("save", f"{pp_bits(save, 36)}")
@@ -157,27 +156,22 @@ def main(num1, num2, num3, num4, monitor = None):
     #suma_mantisas = carry +(bitwise) save
     suma_mantisas, carry_final = ripple_carry_adder(carry, save, (3 * PRECISION_BITS) + 3)
 
-
-    # nunca deberiamos tener ovf? puede salir algun 1 por 2's comp?
-    # assert(~carry_final)
-    
     # ------------------------
     # Leading Zero Anticipator (LZA)
     # ------------------------
 
     lzcounter, sum_ovf, one_bit_less_error, eff_substraction = LZA(
-            a=carry,
-            b= save,
-            signos=signos,
-            bit_width=(3 * PRECISION_BITS) + 3,
-            monitor=monitor
+            carry     = carry ,
+            save      = save ,
+            signos    = signos ,
+            bit_width = (3 * PRECISION_BITS) + 3 ,
+            monitor   = monitor
         )
 
     monitor.record("LZA_zero_count", f"{pp_bits(lzcounter, 6)}") # acotado por ancho total bus = 36 -> $clog2(36)
     monitor.record("LZA_X",          f"{pp_bits(sum_ovf, 1)}")
     monitor.record("LZA_Y",          f"{pp_bits(one_bit_less_error, 1)}")
 
-    # LZC adjustment
     actual_lzcounter = lzcounter + one_bit_less_error
 
     # ------------------------
@@ -195,9 +189,9 @@ def main(num1, num2, num3, num4, monitor = None):
     else:
         abs_suma_mantissas = suma_mantisas
     
-    enable_flush = False
-    max_exp = exponentes[shifts.index(0)]
-    eff_exp = max_exp if max_exp > 0 else 1
+    enable_flush    = False
+    max_exp         = exponentes[shifts.index(0)]
+    eff_exp         = max_exp if max_exp > 0 else 1
 
     tentative_exp = eff_exp + 3 - actual_lzcounter
 
@@ -300,7 +294,7 @@ def main(num1, num2, num3, num4, monitor = None):
     # ------------------------
     # casos especiales 
     # ------------------------
-    special_cases_result = special_cases_handling(nums_info)
+    special_cases_result = special_cases_handling(nums_info, result_is_inf, rounded_sign)
 
     # ------------------------
     # packing y generacion de resultado final
