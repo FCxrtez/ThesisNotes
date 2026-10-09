@@ -1,0 +1,103 @@
+=== DEBUG REPORT: ALIGN_STRESS_1L_3S ===
+
+Vector Index : 592
+Inputs (Hex)    : 764d028c803a1495
+Inputs (Float16): [2.5808e+04, 3.8862e-05, -3.4571e-06, 1.1187e-03]
+Expected (GT)   : 764d  (2.5808e+04)
+Actual (HW)     : 7c00  (inf)
+ULP Error    : 1459
+----------------------------------------
+
+
+Si usamos este vector como input tenemos que en el LZA se generan los vectores:
+
+LZA:
+  T: 0001 1001 0011 0100 0000 0000 0001 0010 1111
+  G: 0000 0000 0000 0000 0000 0000 0000 0000 0000
+  Z: 1110 0110 1100 1011 1111 1111 1110 1101 0000
+
+  flag V: True -> eff Substraction 
+ 
+  F: 1010 0110 1100 1010 0000 0000 0010 1101 0000
+
+Pre-encoding:
+  Gp_p: 0 0000 0000 0000 0000 0000 0000 0000 0000 0001
+  Gp_n: 1 0000 1001 0001 0100 0000 0000 0001 0010 0000
+  Gp_z: 0 1111 0110 1110 1011 1111 1111 1110 1101 1110
+
+  Gn_p: 1 1100 1101 1001 0111 1111 1111 1101 1010 0001
+  Gn_n: 0 0000 0000 0000 0000 0000 0000 0000 0000 0000
+  Gn_z: 0 0011 0010 0110 1000 0000 0000 0010 0101 1110
+
+--------------------------------------------------
+
+Resultados LZA:
+  Cantidad de ceros a la izquierda: 0
+  Señal de error X (overflow en suma): 0
+  Señal de error Y (one bit less): 0
+
+--------------------------------------------------
+
+pero si usamos
+Inputs (Float16): [2.5808e+04, 0, 0, 0]
+El output si es correcto, la diferencia esta que en el LZA se genera:
+
+LZA:
+  T: 0001 1001 0011 0100 0000 0000 0000 0000 0000
+  G: 0000 0000 0000 0000 0000 0000 0000 0000 0000
+  Z: 1110 0110 1100 1011 1111 1111 1111 1111 1111
+
+  flag V: False -> eff Addition 
+ 
+  F: 0010 0110 1100 1010 0000 0000 0000 0000 0000
+
+Pre-encoding:
+  Gp_p: 0 0000 0000 0000 0000 0000 0000 0000 0000 0000
+  Gp_n: 0 0000 1001 0001 0100 0000 0000 0000 0000 0000
+  Gp_z: 1 1111 0110 1110 1011 1111 1111 1111 1111 1111
+
+  Gn_p: 1 1100 1101 1001 0111 1111 1111 1111 1111 1111
+  Gn_n: 0 0000 0000 0000 0000 0000 0000 0000 0000 0000
+  Gn_z: 0 0011 0010 0110 1000 0000 0000 0000 0000 0000
+
+--------------------------------------------------
+
+Resultados LZA:
+  Cantidad de ceros a la izquierda: 2
+  Señal de error X (overflow en suma): 0
+  Señal de error Y (one bit less): 1
+
+La diferencia esta en la flag V, que si metemos todos ceros se determina que es una eff adition
+y en ese caso el vector F se genera como corresponde.
+
+Cambiar esta flag para que se asigne al reves de como esta programado ahora no es la solucion
+Pues rompe todo en el bench.
+
+=====SOLUCION=====
+
+Para solucionarlo comparamos los bits correspondientes a la mantissa mas grande, es decir 
+V_correction = ( T[ BIT_WIDTH-1-3 -: PRECISION_BITS] == save[ BIT_WIDTH-1-3 -: PRECISION_BITS] )
+
+Como T es el resultado de hacer el XOR de el vector save y carry, nos dice si hay algun
+bit distinto de 0 en el carry, lo que implicaria que hay una mantissa a la altura de
+la mantissa mas grande y por lo tanto tendria sentido que la flag de V sea de eff Substraction.
+Luego, si V_correction es verdadera -> eff addition
+y el vector F se calcularia como necesitamos para que el LZA saque un valor correcto.
+
+De todas formas este fix genera bug en vectores generados uniformemente. Vamos a ver
+si podemos poner una condicion mas fuerte para evitar estos bugs
+
+!NO SOLICIONA TODOS LOS CASOS!
+Ademas falta catchear el caso en que estos dos busses son disitintos pero porque tenemos dos mantisas del 
+mismo signo, modificando el vector save y carry. Por ejemplo si tenemos 2 operandos negativos grandes y 1
+positivo muy chico pasara que:
+las mantisas no van a coincidir, el detector vera que tenemos distintos signos -> V: eff Substraction
+pero lo que deberia pasar seria que, como el operando positivo es muy pequeño y no llega a afectar el resultado
+final la flag deberia indicar un eff Substraction
+
+En definitiva, podemos diseñar una logica que filtre las mantisas segun su signo, y una vez filtradas
+solo tener en cuenta las de signo opuesto al exponente mas grande para determinar V
+
+Es decir,
+El problema esta en que debemos definir la flag V con mas informacion que solo si tengo signos opuestos.
+Tambien me importa en que parte del bus se encuentra la mantisa de signo opuesto.

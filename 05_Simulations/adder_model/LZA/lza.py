@@ -1,6 +1,5 @@
 from ..pp_functions.pp_functions import pp_bits_spaced, pp_bits
 
-
 def get_bit(value, index):
     return (value >> index) & 1
 
@@ -104,7 +103,6 @@ def simulate_reduction_tree(leaf_nodes):
     current_layer = leaf_nodes
     capa = 0
 
-
     while len(current_layer) > 1:
         next_layer = []
         capa += 1
@@ -162,22 +160,14 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width=36):
     assert(len(inp_nodes_pos) == bit_width + 1)
     assert(len(inp_nodes_neg) == bit_width + 1)
     
-    #print("   " + "-" * 25 + "\n")
-    #print("Reduccion arbol para resultado positivo:")
     root_pos = simulate_reduction_tree(inp_nodes_pos)
-    #print("   " + "-" * 25 + "\n")
-    #print("Reduccion arbol para resultado negativo:")
     root_neg = simulate_reduction_tree(inp_nodes_neg)
-    #print("   " + "-" * 25 + "\n")
-
-
+    
     P_p, N_p, Y_p = root_pos[1], root_pos[2], root_pos[3]
-    Y_n = root_neg[3]
-
+    Y_n           = root_neg[3]
 
     X = (V ^ 1) & Y_p
     Y = (V & (Y_p | Y_n)) | ((V ^ 1) & (N_p & Z_n1))
-
 
     return X, Y
 

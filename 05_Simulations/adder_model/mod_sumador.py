@@ -101,13 +101,13 @@ def main(num1, num2, num3, num4, monitor = None):
     #       are shifted out and compressed into a sticky bit.
     #       BEFORE THE EXPONENT SHIFT:
     #       | packed_mantissa[i] | 000..000 |
-    #        <-        p       -> <- 3p+3 ->
+    #        <-        p       -> <- 2p+3 ->
     #       AFTER THE SHIFT:
     #       | 000..........000 | packed_mantissa[i] | 000...............0GR |  sticky bits  |
     #        <-   shifts[i]  -> <-         p      -> <-  2p+3-shifts[i]   -> <-  up to p  ->
 
     # Hacemos solo implicit_mantisas[i] << 3 * PRECISION_BITS pues a izq deben quedar 1 bit signo + 2 bit overflow que enmascaramos luego
-    # 0x1_FFFF_FFFF(33'b1) para tener una precision maxima de 33 bits para mantisas (3*PRECISION_BITS) [cambiado a 0xFFF_FFFF_FFFF]
+    # 0x1_FFFF_FFFF({33{1'b1}}) para tener una precision maxima de 33 bits para mantisas (3*PRECISION_BITS) [cambiado a 0xFFF_FFFF_FFFF]
     # Deberia agregar una precision extra para los sticky bits? 0xFFF_FFFF_FFFF(44'b1) (3*PRECISION_BITS) + 11 (sticky bits)
 
     # Quiero que quede el MSB de las mantisas en el bit 33 o 44?
@@ -145,7 +145,6 @@ def main(num1, num2, num3, num4, monitor = None):
     print("Mantisas signadas y alineadas:")
     for i, value in enumerate(mantisas_twos_complement_w_ovf):
         print(f"  {i+1}: {pp_bits_spaced(value, 36)}")
-    
     print("\n"+"-"*50+"\n")
 
     save, carry = add_4_signed_mantissas(mantisas_twos_complement_w_ovf, (3 * PRECISION_BITS) + 3)
@@ -153,17 +152,16 @@ def main(num1, num2, num3, num4, monitor = None):
     monitor.record("save", f"{pp_bits(save, 36)}")
     monitor.record("carry", f"{pp_bits(carry, 36)}")
 
-    #suma_mantisas = carry +(bitwise) save
-    suma_mantisas, carry_final = ripple_carry_adder(carry, save, (3 * PRECISION_BITS) + 3)
+    suma_mantisas, _ = ripple_carry_adder(carry, save, (3 * PRECISION_BITS) + 3)
 
     # ------------------------
     # Leading Zero Anticipator (LZA)
     # ------------------------
 
     lzcounter, sum_ovf, one_bit_less_error, eff_substraction = LZA(
-            carry     = carry ,
-            save      = save ,
-            signos    = signos ,
+            carry     = carry                    ,
+            save      = save                     ,
+            signos    = signos                   ,
             bit_width = (3 * PRECISION_BITS) + 3 ,
             monitor   = monitor
         )

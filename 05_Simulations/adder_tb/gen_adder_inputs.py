@@ -69,7 +69,7 @@ def gen_catastrophic_cancellation_vec( rng ):
     cancel_operands = (cancel_signs << 15) | (large_exp << 10) | large_mantisa
     rnd_operands    = (rnd_signs << 15) | (small_exp << 10) | small_mantisas
 
-    return np.concatenate([cancel_operands, rnd_operands]).view(np.uint16)
+    return np.array([cancel_operands[0], rnd_operands[0], rnd_operands[1], cancel_operands[1]]).view(np.uint16)
 
 
 def gen_transition_vec(rng, mode):

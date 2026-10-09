@@ -27,17 +27,17 @@ def exp_align(e):
     print("  " + str(is_max))
 
     if is_max[0]:
-        shifts[1] = differences[0][2]
-        shifts[2] = differences[1][2]
-        shifts[3] = differences[2][2]
+        shifts[1] =  differences[0][2]
+        shifts[2] =  differences[1][2]
+        shifts[3] =  differences[2][2]
     elif is_max[1]:
         shifts[0] = -differences[0][2]
-        shifts[2] = differences[3][2]
-        shifts[3] = differences[4][2]
+        shifts[2] =  differences[3][2]
+        shifts[3] =  differences[4][2]
     elif is_max[2]:
         shifts[0] = -differences[1][2]
         shifts[1] = -differences[3][2]
-        shifts[3] = differences[5][2]
+        shifts[3] =  differences[5][2]
     elif is_max[3]:
         shifts[0] = -differences[2][2]
         shifts[1] = -differences[4][2]
@@ -66,7 +66,6 @@ def twos_complement(a_mantisas, signos, bit_mask=33):
         else:
             twos_comp = am & mask_w_ovf
 
-        # No debo agregar el signo, los bits the ovf ya indican el signo correcto.
         twos_complement_mantisas.append(twos_comp)
 
         print(f"Signo: {s}")
