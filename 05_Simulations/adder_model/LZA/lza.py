@@ -35,7 +35,7 @@ def gen_F(G, T, Z, V, bit_width):
 
         else:
             # General: f_i = T_i-1(G_i ~Z_i+1 + Z_i ~G_i+1) + ~T_i-1(Z_i ~Z_i+1 + G_i ~G_i+1)
-            term_T     = t_next       & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
+            term_T     =  t_next      & ((g_i & (z_prev ^ 1)) | (z_i & (g_prev ^ 1)))
             term_not_T = (t_next ^ 1) & ((z_i & (z_prev ^ 1)) | (g_i & (g_prev ^ 1)))
             f_i = term_T | term_not_T
 
@@ -171,32 +171,51 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width=36):
 
     return X, Y
 
-def LZA(carry, save, signos, bit_width=36, monitor = None):
+def extract_bits_minus(value: int, bit_width: int, msb_offset: int, width: int) -> int:
+    """Replicates Verilog: value[bit_width - 1 - msb_offset -: width]"""
+    shift = bit_width - msb_offset - width
+    mask  = (1 << width) - 1
+
+    return (value >> shift) & mask
+
+def LZA(carry, save, signos, V, bit_width=36, monitor = None):
     """
     Simulates carry Leading Zero Anticipator (LZA) with concurrent error detection.
     """
-    if all(signos) or all(map(lambda s: 0 if s == 1 else 1, signos)):
-        V = False
-    else:
-        V = True
-
-    monitor.record("V", f"{pp_bits(V, 1)}")
-
     T = carry ^ save
     G = carry & save
     Z = int(~(carry | save))
 
 
+    T_MS_mantissa     = extract_bits_minus(value=T   ,  bit_width=bit_width, msb_offset=3, width=11)
+    save_MS_mantissa  = extract_bits_minus(value=save,  bit_width=bit_width, msb_offset=3, width=11)
+
+    carry_s_ovf       = extract_bits_minus(value=carry, bit_width=bit_width, msb_offset=0, width=3)
+    save_s_ovf        = extract_bits_minus(value=save,  bit_width=bit_width, msb_offset=0, width=3)
+    V_correction_flag = ( carry_s_ovf != 0 ) and ( save_s_ovf != 0 )
+
+    # if (V_correction_flag):
+    #     V = True
+
+    # if all(signos) or all(map(lambda s: 0 if s == 1 else 1, signos)) or V_correction_flag :
+    #     V = False
+    # else:
+    #     V = True
+
+    monitor.record("V", f"{pp_bits(V, 1)}")
+
     print("LZA:")
     print(f"  T: {pp_bits_spaced(T, bit_width)}")
     print(f"  G: {pp_bits_spaced(G, bit_width)}")
     print(f"  Z: {pp_bits_spaced(Z, bit_width)}\n")
+    print(f"  carry_s_ovf : {pp_bits_spaced(carry_s_ovf, 3)}")
+    print(f"  save_s_ovf  : {pp_bits_spaced(save_s_ovf, 3)}")
+    print(f"                    {"ZERO" if V_correction_flag else "NOT ZERO"}\n")
     print(f"  flag V: {V} -> {'eff Substraction' if V else 'eff Addition'} \n ")
 
     F = gen_F(G, T, Z, V, bit_width)
 
     monitor.record("LZA_F", pp_bits(F, bit_width))
-
     print(f"  F: {pp_bits_spaced(F, bit_width)}\n")
 
     # Calculating the leading-zero number

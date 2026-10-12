@@ -134,6 +134,33 @@ def main(num1, num2, num3, num4, monitor = None):
     monitor.record("sticky_bits", f"{pp_bits_bus(sticky_bits, 1)}")
 
     # ------------------------
+    # early V detection
+    # ------------------------
+
+    CANCELLATION_THRESHOLD = 12
+
+    threat_detected = False
+    max_sign        = signos[is_max.index(True)]
+    print(max_sign)
+
+    for i, shift in enumerate(shifts):
+        is_opp_sign     = ( max_sign != signos[i]              )
+        is_close_enough = ( shift    <= CANCELLATION_THRESHOLD )
+
+        if ((is_opp_sign and is_close_enough) or (signos_cambiados[i] == 1)):
+            threat_detected = True
+        print(f"operand n{i}:\n\tshift of:{shift}\n\topp_sign:{is_opp_sign} [changed_sign:{signos_cambiados[i]}]\n\tis_close_enough:{is_close_enough}\n\t")
+
+    if all(signos) or all(map(lambda s: 0 if s == 1 else 1, signos)) or not threat_detected:
+        # eff addition
+        V_early = False
+    else:
+        # eff substraction
+        V_early = True
+
+    print("\n"+"-"*50+"\n")
+
+    # ------------------------
     # suma de mantisas con signo
     # ------------------------
 
@@ -162,6 +189,7 @@ def main(num1, num2, num3, num4, monitor = None):
             carry     = carry                    ,
             save      = save                     ,
             signos    = signos                   ,
+            V         = V_early                  ,
             bit_width = (3 * PRECISION_BITS) + 3 ,
             monitor   = monitor
         )

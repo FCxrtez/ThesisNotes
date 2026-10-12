@@ -1,9 +1,0 @@
-=== DEBUG REPORT: ALIGN_STRESS_3L_1S ===
-
-Vector Index : 931
-Inputs (Hex)    : f8e10068e4b7ed0c
-Inputs (Float16): [-3.9968e+04, 6.1989e-06, -1.2070e+03, -5.1680e+03]
-Expected (GT)   : f9a8  (-4.6336e+04)
-Actual (HW)     : fc00  (-inf)
-ULP Error    : 600
-----------------------------------------

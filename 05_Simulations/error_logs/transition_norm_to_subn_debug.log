@@ -1,22 +1,15 @@
 === DEBUG REPORT: TRANSITION_NORM_TO_SUBN ===
 
-Vector Index : 54
-Inputs (Hex)    : 41cb42ea41eec8a9
-Inputs (Float16): [2.8965e+00, 3.4570e+00, 2.9648e+00, -9.3203e+00]
-Expected (GT)   : 9800  (-1.9531e-03)
-Actual (HW)     : 1400  (9.7656e-04)
-ULP Error    : 11264
-----------------------------------------
-Vector Index : 99
-Inputs (Hex)    : 3cd540733d74c4cc
-Inputs (Float16): [1.2080e+00, 2.2246e+00, 1.3633e+00, -4.7969e+00]
+Vector Index : 20
+Inputs (Hex)    : 40c441b43d13c681
+Inputs (Float16): [2.3828e+00, 2.8516e+00, 1.2686e+00, -6.5039e+00]
 Expected (GT)   : 9400  (-9.7656e-04)
 Actual (HW)     : 1000  (4.8828e-04)
 ULP Error    : 9216
 ----------------------------------------
-Vector Index : 141
-Inputs (Hex)    : 436043794376c994
-Inputs (Float16): [3.6875e+00, 3.7363e+00, 3.7305e+00, -1.1156e+01]
+Vector Index : 114
+Inputs (Hex)    : 406743b142f3c8c3
+Inputs (Float16): [2.2012e+00, 3.8457e+00, 3.4746e+00, -9.5234e+00]
 Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
@@ -24,13 +17,6 @@ ULP Error    : 11264
 Vector Index : 153
 Inputs (Hex)    : 428240af411ec814
 Inputs (Float16): [3.2539e+00, 2.3418e+00, 2.5586e+00, -8.1562e+00]
-Expected (GT)   : 9800  (-1.9531e-03)
-Actual (HW)     : 1400  (9.7656e-04)
-ULP Error    : 11264
-----------------------------------------
-Vector Index : 174
-Inputs (Hex)    : 3fd843ed4096c81c
-Inputs (Float16): [1.9609e+00, 3.9629e+00, 2.2930e+00, -8.2188e+00]
 Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
@@ -49,9 +35,9 @@ Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
 ----------------------------------------
-Vector Index : 207
-Inputs (Hex)    : 40d33fdd4052c68a
-Inputs (Float16): [2.4121e+00, 1.9658e+00, 2.1602e+00, -6.5391e+00]
+Vector Index : 240
+Inputs (Hex)    : 41cb3f35424cc7d9
+Inputs (Float16): [2.8965e+00, 1.8018e+00, 3.1484e+00, -7.8477e+00]
 Expected (GT)   : 9400  (-9.7656e-04)
 Actual (HW)     : 1000  (4.8828e-04)
 ULP Error    : 9216
@@ -59,20 +45,6 @@ ULP Error    : 9216
 Vector Index : 269
 Inputs (Hex)    : 404540fe4118c72e
 Inputs (Float16): [2.1348e+00, 2.4961e+00, 2.5469e+00, -7.1797e+00]
-Expected (GT)   : 9800  (-1.9531e-03)
-Actual (HW)     : 1400  (9.7656e-04)
-ULP Error    : 11264
-----------------------------------------
-Vector Index : 277
-Inputs (Hex)    : 40f241c43de7c6d5
-Inputs (Float16): [2.4727e+00, 2.8828e+00, 1.4756e+00, -6.8320e+00]
-Expected (GT)   : 9400  (-9.7656e-04)
-Actual (HW)     : 1000  (4.8828e-04)
-ULP Error    : 9216
-----------------------------------------
-Vector Index : 278
-Inputs (Hex)    : 42144072414bc7e9
-Inputs (Float16): [3.0391e+00, 2.2227e+00, 2.6465e+00, -7.9102e+00]
 Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
@@ -91,20 +63,6 @@ Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
 ----------------------------------------
-Vector Index : 304
-Inputs (Hex)    : 4090435c4213c880
-Inputs (Float16): [2.2812e+00, 3.6797e+00, 3.0371e+00, -9.0000e+00]
-Expected (GT)   : 9800  (-1.9531e-03)
-Actual (HW)     : 1400  (9.7656e-04)
-ULP Error    : 11264
-----------------------------------------
-Vector Index : 316
-Inputs (Hex)    : 41824286423fc892
-Inputs (Float16): [2.7539e+00, 3.2617e+00, 3.1230e+00, -9.1406e+00]
-Expected (GT)   : 9800  (-1.9531e-03)
-Actual (HW)     : 1400  (9.7656e-04)
-ULP Error    : 11264
-----------------------------------------
 Vector Index : 340
 Inputs (Hex)    : 42d63d0a3d3dc5fd
 Inputs (Float16): [3.4180e+00, 1.2598e+00, 1.3096e+00, -5.9883e+00]
@@ -112,16 +70,37 @@ Expected (GT)   : 9400  (-9.7656e-04)
 Actual (HW)     : 1000  (4.8828e-04)
 ULP Error    : 9216
 ----------------------------------------
-Vector Index : 347
-Inputs (Hex)    : 41ce43de40d7c8a1
-Inputs (Float16): [2.9023e+00, 3.9336e+00, 2.4199e+00, -9.2578e+00]
+Vector Index : 426
+Inputs (Hex)    : 3d2d40294206c663
+Inputs (Float16): [1.2939e+00, 2.0801e+00, 3.0117e+00, -6.3867e+00]
+Expected (GT)   : 9400  (-9.7656e-04)
+Actual (HW)     : 1000  (4.8828e-04)
+ULP Error    : 9216
+----------------------------------------
+Vector Index : 491
+Inputs (Hex)    : 3da63d7342c9c62b
+Inputs (Float16): [1.4121e+00, 1.3623e+00, 3.3926e+00, -6.1680e+00]
+Expected (GT)   : 9400  (-9.7656e-04)
+Actual (HW)     : 1000  (4.8828e-04)
+ULP Error    : 9216
+----------------------------------------
+Vector Index : 525
+Inputs (Hex)    : 3e2d42ee3ef5c6c0
+Inputs (Float16): [1.5439e+00, 3.4648e+00, 1.7393e+00, -6.7500e+00]
 Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
 ----------------------------------------
-Vector Index : 511
-Inputs (Hex)    : 41bc423d40ddc836
-Inputs (Float16): [2.8672e+00, 3.1191e+00, 2.4316e+00, -8.4219e+00]
+Vector Index : 539
+Inputs (Hex)    : 4033418b43d9c866
+Inputs (Float16): [2.0996e+00, 2.7715e+00, 3.9238e+00, -8.7969e+00]
+Expected (GT)   : 9800  (-1.9531e-03)
+Actual (HW)     : 1400  (9.7656e-04)
+ULP Error    : 11264
+----------------------------------------
+Vector Index : 596
+Inputs (Hex)    : 426343813d2cc81f
+Inputs (Float16): [3.1934e+00, 3.7520e+00, 1.2930e+00, -8.2422e+00]
 Expected (GT)   : 9c00  (-3.9062e-03)
 Actual (HW)     : 1800  (1.9531e-03)
 ULP Error    : 13312
@@ -140,12 +119,12 @@ Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
 ----------------------------------------
-Vector Index : 640
-Inputs (Hex)    : 3ed13e0c430dc6be
-Inputs (Float16): [1.7041e+00, 1.5117e+00, 3.5254e+00, -6.7422e+00]
-Expected (GT)   : 9400  (-9.7656e-04)
-Actual (HW)     : 1000  (4.8828e-04)
-ULP Error    : 9216
+Vector Index : 632
+Inputs (Hex)    : 413e40c24216c806
+Inputs (Float16): [2.6211e+00, 2.3789e+00, 3.0430e+00, -8.0469e+00]
+Expected (GT)   : 9c00  (-3.9062e-03)
+Actual (HW)     : 1800  (1.9531e-03)
+ULP Error    : 13312
 ----------------------------------------
 Vector Index : 657
 Inputs (Hex)    : 405a41854184c7b2
@@ -161,6 +140,13 @@ Expected (GT)   : 9400  (-9.7656e-04)
 Actual (HW)     : 1000  (4.8828e-04)
 ULP Error    : 9216
 ----------------------------------------
+Vector Index : 769
+Inputs (Hex)    : 4067422b3e46c6db
+Inputs (Float16): [2.2012e+00, 3.0840e+00, 1.5684e+00, -6.8555e+00]
+Expected (GT)   : 9800  (-1.9531e-03)
+Actual (HW)     : 1400  (9.7656e-04)
+ULP Error    : 11264
+----------------------------------------
 Vector Index : 776
 Inputs (Hex)    : 433e3fc03f03c750
 Inputs (Float16): [3.6211e+00, 1.9375e+00, 1.7529e+00, -7.3125e+00]
@@ -175,12 +161,19 @@ Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
 ----------------------------------------
-Vector Index : 798
-Inputs (Hex)    : 43bc423f407fc89f
-Inputs (Float16): [3.8672e+00, 3.1230e+00, 2.2480e+00, -9.2422e+00]
-Expected (GT)   : 9c00  (-3.9062e-03)
-Actual (HW)     : 1800  (1.9531e-03)
-ULP Error    : 13312
+Vector Index : 794
+Inputs (Hex)    : 3f22400d4109c654
+Inputs (Float16): [1.7832e+00, 2.0254e+00, 2.5176e+00, -6.3281e+00]
+Expected (GT)   : 9800  (-1.9531e-03)
+Actual (HW)     : 1400  (9.7656e-04)
+ULP Error    : 11264
+----------------------------------------
+Vector Index : 808
+Inputs (Hex)    : 3fa93f543deec53b
+Inputs (Float16): [1.9150e+00, 1.8320e+00, 1.4824e+00, -5.2305e+00]
+Expected (GT)   : 9400  (-9.7656e-04)
+Actual (HW)     : 1000  (4.8828e-04)
+ULP Error    : 9216
 ----------------------------------------
 Vector Index : 818
 Inputs (Hex)    : 3f1a434a4134c803
@@ -189,31 +182,31 @@ Expected (GT)   : 9800  (-1.9531e-03)
 Actual (HW)     : 1400  (9.7656e-04)
 ULP Error    : 11264
 ----------------------------------------
-Vector Index : 882
-Inputs (Hex)    : 42c940153ee3c728
-Inputs (Float16): [3.3926e+00, 2.0410e+00, 1.7217e+00, -7.1562e+00]
-Expected (GT)   : 9400  (-9.7656e-04)
-Actual (HW)     : 1000  (4.8828e-04)
-ULP Error    : 9216
+Vector Index : 876
+Inputs (Hex)    : 3e5440523cfac4fd
+Inputs (Float16): [1.5820e+00, 2.1602e+00, 1.2441e+00, -4.9883e+00]
+Expected (GT)   : 9800  (-1.9531e-03)
+Actual (HW)     : 1400  (9.7656e-04)
+ULP Error    : 11264
 ----------------------------------------
-Vector Index : 883
-Inputs (Hex)    : 42463cf53dcec5d4
-Inputs (Float16): [3.1367e+00, 1.2393e+00, 1.4512e+00, -5.8281e+00]
-Expected (GT)   : 9400  (-9.7656e-04)
-Actual (HW)     : 1000  (4.8828e-04)
-ULP Error    : 9216
-----------------------------------------
-Vector Index : 889
-Inputs (Hex)    : 4304422243c4c93b
-Inputs (Float16): [3.5078e+00, 3.0664e+00, 3.8828e+00, -1.0461e+01]
+Vector Index : 898
+Inputs (Hex)    : 425242603fa0c821
+Inputs (Float16): [3.1602e+00, 3.1875e+00, 1.9062e+00, -8.2578e+00]
 Expected (GT)   : 9c00  (-3.9062e-03)
 Actual (HW)     : 1800  (1.9531e-03)
 ULP Error    : 13312
 ----------------------------------------
-Vector Index : 907
-Inputs (Hex)    : 3ed24061423ac703
-Inputs (Float16): [1.7051e+00, 2.1895e+00, 3.1133e+00, -7.0117e+00]
-Expected (GT)   : 9c00  (-3.9062e-03)
-Actual (HW)     : 1800  (1.9531e-03)
-ULP Error    : 13312
+Vector Index : 942
+Inputs (Hex)    : 41b943443dcdc7f2
+Inputs (Float16): [2.8613e+00, 3.6328e+00, 1.4502e+00, -7.9453e+00]
+Expected (GT)   : 9400  (-9.7656e-04)
+Actual (HW)     : 1000  (4.8828e-04)
+ULP Error    : 9216
+----------------------------------------
+Vector Index : 960
+Inputs (Hex)    : 3e423fe240f3c603
+Inputs (Float16): [1.5645e+00, 1.9707e+00, 2.4746e+00, -6.0117e+00]
+Expected (GT)   : 9800  (-1.9531e-03)
+Actual (HW)     : 1400  (9.7656e-04)
+ULP Error    : 11264
 ----------------------------------------
