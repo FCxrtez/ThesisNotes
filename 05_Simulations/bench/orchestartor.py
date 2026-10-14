@@ -64,18 +64,6 @@ def compute_ulp_diff(test_bits, golden_bits, exact_match):
     difference_different_sign   = magnitude_test + magnitude_golden
     abs_same_sign               = np.abs(difference_same_sign)
 
-    # Same sign: direction depends on whether numbers are positive or negative
-    signed_dif_same_sign = np.where(
-        sign_test == 0,
-        magnitude_test - magnitude_golden,
-        magnitude_golden - magnitude_test
-    )
-
-    signed_diff_diff_sign = np.where(
-        sign_test == 0,
-
-    )
-
     #                  same_sign ? difference_same_sign : difference_different_sign
     ulp_arr = np.where( same_sign, abs_same_sign,  difference_different_sign )
 
