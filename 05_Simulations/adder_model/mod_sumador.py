@@ -9,15 +9,15 @@ from .rounding import round
 # Format Constants
 # ------------------------
 
-MAN_BITS = 10
-EXP_BITS = 5
-PRECISION_BITS = MAN_BITS + 1
-EXTENDED_PRECISION = (3 * PRECISION_BITS) + 7
-SIGN_OVF_BITS = 3
-INTERNAL_PRECISION = EXTENDED_PRECISION + SIGN_OVF_BITS
-STICKY_BITS = PRECISION_BITS
-ALIGNMENT_WIDTH = EXTENDED_PRECISION + STICKY_BITS
-FTZ_EN = 0
+MAN_BITS            = 10
+EXP_BITS            = 5
+SIGN_OVF_BITS       = 3
+PRECISION_BITS      = MAN_BITS + 1
+STICKY_BITS         = PRECISION_BITS
+EXTENDED_PRECISION  = (3 * PRECISION_BITS) + 7
+INTERNAL_PRECISION  = EXTENDED_PRECISION + SIGN_OVF_BITS
+ALIGNMENT_WIDTH     = EXTENDED_PRECISION + STICKY_BITS
+FTZ_EN              = 0
 
 def main(num1, num2, num3, num4, monitor = None):
     """
@@ -174,8 +174,9 @@ def main(num1, num2, num3, num4, monitor = None):
     # Normalizacion, calculo de signo y exponente final
     # ------------------------
 
-    is_sum_negative = (suma_mantisas >> (INTERNAL_PRECISION - 1)) & 0x1
-    final_sign      = pivot ^ is_sum_negative
+    is_sum_negative     = (suma_mantisas >> (INTERNAL_PRECISION - 1)) & 0x1
+    final_sign          = pivot ^ is_sum_negative
+    is_normal_result    = False
 
     monitor.record("is_sum_negative", f"{pp_bits(is_sum_negative, 1)}")
     monitor.record("final_sign",      f"{pp_bits(final_sign, 1)}")
@@ -193,9 +194,10 @@ def main(num1, num2, num3, num4, monitor = None):
 
     if tentative_exp >= 1:
         # resultado normal
-        shift_amount = actual_lzcounter
-        exp_post_norm = tentative_exp
+        shift_amount = actual_lzcounter - 1
+        exp_post_norm = tentative_exp - 1
         enable_flush = False
+        is_normal_result = True
 
     else:
         # resultado subnormal o cero
@@ -213,6 +215,11 @@ def main(num1, num2, num3, num4, monitor = None):
         normalized_mantisa = 0
     else:
         normalized_mantisa = abs_suma_mantissas << shift_amount
+
+    if is_normal_result:
+        if (((normalized_mantisa >> INTERNAL_PRECISION - 1) & 1) != 1):
+            normalized_mantisa = normalized_mantisa << 1
+            exp_post_norm = exp_post_norm + 1
 
     print("Normalizacion mantisa:")
     print(f"    is_sum_negative: {is_sum_negative}")

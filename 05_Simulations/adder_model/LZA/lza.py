@@ -166,7 +166,7 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width=36):
     P_p, N_p, Y_p = root_pos[1], root_pos[2], root_pos[3]
     Y_n           = root_neg[3]
 
-    X = (V ^ 1) & Y_p
+    X = (V ^ 1) & P_p
     Y = (V & (Y_p | Y_n)) | ((V ^ 1) & (N_p & Z_n1))
 
     return X, Y
@@ -212,7 +212,7 @@ def LZA(carry, save, signos, bit_width=36, monitor = None):
 
     print(f"Resultados LZA:")
     print(f"  Cantidad de ceros a la izquierda: {zeroes}")
-    print(f"  Señal de error X (overflow en suma): {X}")
+    print(f"  Señal de error X (one bit more): {X}")
     print(f"  Señal de error Y (one bit less): {Y}")
     print("\n" + "-" * 50 + "\n")
 
