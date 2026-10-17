@@ -81,10 +81,16 @@ def gen_transition_vec(rng, mode):
 
     else:
         c1, c2, c3 = rng.uniform(1.2, 4.0, size = 3)
-        c_target = rng.uniform(5.9e-8, 6e-5)
+        signs      = rng.integers(0, 2, size=3, dtype=np.uint16)
 
-        c4 = c_target - (c1 + c2 + c3)
-        float16_operands = np.array([c1, c2, c3, c4], dtype=np.float16)
+        values     = np.array([c * norm_to_subn_limit for c in [c1, c2, c3]], dtype=np.float16).view(np.uint16)
+        signed_v   = (values & 0x7FFF) | (signs << 15)
+
+        signed_v_f16 = signed_v.view(np.float16)
+        c_target     = np.float16(rng.uniform(-norm_to_subn_limit, norm_to_subn_limit))
+
+        v4               = c_target - np.sum(signed_v_f16, dtype=np.float16)
+        float16_operands = np.append(signed_v_f16, v4)
 
     return float16_operands.view(np.uint16)
 
