@@ -166,7 +166,7 @@ def error_detection(Gp, Gn, V, Z_n1, bit_width=36):
     P_p, N_p, Y_p = root_pos[1], root_pos[2], root_pos[3]
     Y_n           = root_neg[3]
 
-    X = (V ^ 1) & Y_p
+    X = (V ^ 1) & P_p
     Y = (V & (Y_p | Y_n)) | ((V ^ 1) & (N_p & Z_n1))
 
     return X, Y
@@ -182,9 +182,11 @@ def LZA(carry, save, signos, bit_width=36, monitor = None):
 
     monitor.record("V", f"{pp_bits(V, 1)}")
 
-    T = carry ^ save
-    G = carry & save
-    Z = int(~(carry | save))
+    mask = (1 << bit_width) - 1
+
+    T = (  carry ^ save ) & mask
+    G = (  carry & save ) & mask
+    Z = (~(carry | save)) & mask
 
 
     print("LZA:")
@@ -207,7 +209,7 @@ def LZA(carry, save, signos, bit_width=36, monitor = None):
     # Pre-encoding (deberian tener un bit mas, el -1)
     Gp, Gn = pre_encoding(G, T, Z, V, bit_width, monitor)
 
-    Z_n1 = (Z >> bit_width) & 1 # Z_-1 es el bit mas significativo de Z_n1
+    Z_n1 = (Z >> bit_width - 1) & 1 # Z_-1 es el bit mas significativo de Z_n1
     X, Y = error_detection(Gp, Gn, V, Z_n1, bit_width)
 
     print(f"Resultados LZA:")

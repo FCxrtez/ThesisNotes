@@ -72,7 +72,7 @@ class SimMonitor:
                     
                         fd.write(f"{sim_signal}\n")
 
-        else: print("INFO: No assertion signals generated\n:")
+        else: print("[INFO]: No assertion signals generated\n")
 
     def assert_data(self):
         
