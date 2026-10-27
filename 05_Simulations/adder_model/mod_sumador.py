@@ -9,14 +9,18 @@ from .rounding import round
 # Format Constants
 # ------------------------
 
+FP_WIDTH            = 16
 MAN_BITS            = 10
 EXP_BITS            = 5
 SIGN_OVF_BITS       = 3
 PRECISION_BITS      = MAN_BITS + 1
 STICKY_BITS         = PRECISION_BITS
-EXTENDED_PRECISION  = (3 * PRECISION_BITS) + 7
-INTERNAL_PRECISION  = EXTENDED_PRECISION + SIGN_OVF_BITS
-ALIGNMENT_WIDTH     = EXTENDED_PRECISION + STICKY_BITS
+ALIGNMENT_PRECISION = (3 * PRECISION_BITS) + 7
+INTERNAL_PRECISION  = ALIGNMENT_PRECISION + SIGN_OVF_BITS
+ALIGNMENT_WIDTH     = ALIGNMENT_PRECISION + STICKY_BITS
+MAN_MASK            = (1 << MAN_BITS) - 1
+EXP_MASK            = (1 << EXP_BITS) - 1
+LZC_WIDTH           = INTERNAL_PRECISION.bit_length()
 FTZ_EN              = 0
 
 def main(num1, num2, num3, num4, monitor = None):
@@ -29,21 +33,21 @@ def main(num1, num2, num3, num4, monitor = None):
 
     for i in binary_nums: 
         # [sign | exponent | mantissa]
-        signo = (i >> (MAN_BITS + EXP_BITS)) & 0x1 # 1 bit
-        exponente = (i >> MAN_BITS) & 0x1F # 5 bits
-        mantisa = i & 0x3FF # 10 bits
+        signo     = (i >> (MAN_BITS + EXP_BITS)) & 0x1 # 1 bit
+        exponente = (i >>  MAN_BITS            ) & EXP_MASK
+        mantisa   =  i                           & MAN_MASK
 
         signos.append(signo)
         exponentes.append(exponente)
         mantisas.append(mantisa)
     
     monitor.record("signos"    , f"{pp_bits_bus(signos, 1)}")
-    monitor.record("mantisas"  , f"{pp_bits_bus(mantisas, 10)}")
+    monitor.record("mantisas"  , f"{pp_bits_bus(mantisas, MAN_BITS)}")
 
     print("\n")
     for i,(bn, n) in enumerate(zip(binary_nums, [num1, num2, num3, num4])):
-        print(f"Representacion en bits de {n}: {pp_bits(bn, 16)}")
-        print(f"  signo: {pp_bits(signos[i], 1)}, exponente: {pp_bits(exponentes[i], 5)}, mantisa: {pp_bits_spaced(mantisas[i], 10)}\n")
+        print(f"Representacion en bits de {n}: {pp_bits(bn, FP_WIDTH)}")
+        print(f"  signo: {pp_bits(signos[i], 1)}, exponente: {pp_bits(exponentes[i], EXP_BITS)}, mantisa: {pp_bits_spaced(mantisas[i], MAN_BITS)}\n")
 
     print("\n"+"-"*50+"\n")
 
@@ -59,10 +63,10 @@ def main(num1, num2, num3, num4, monitor = None):
 
         print(f"Operando {e+1}:")
         print(f"  Bit implicito: {int(nums_info[e].is_normal)}")
-        print(f"  Mantisa original: {pp_bits_spaced(m, 10)}")
-        print(f"  Mantisa con bit implicito: {pp_bits_spaced(implicit_mantisa, 11)}\n")
+        print(f"  Mantisa original: {pp_bits_spaced(m, MAN_BITS)}")
+        print(f"  Mantisa con bit implicito: {pp_bits_spaced(implicit_mantisa, PRECISION_BITS)}\n")
     
-    monitor.record("implicit_mantisas", f"{pp_bits_bus(implicit_mantisas, 11)}")
+    monitor.record("implicit_mantisas", f"{pp_bits_bus(implicit_mantisas, PRECISION_BITS)}")
 
     exponentes_exp_align = []
 
@@ -74,7 +78,7 @@ def main(num1, num2, num3, num4, monitor = None):
 
     print("\n"+"-"*50+"\n")
 
-    monitor.record("exponentes", f"{pp_bits_bus(exponentes_exp_align, 5)}")
+    monitor.record("exponentes", f"{pp_bits_bus(exponentes_exp_align, EXP_BITS)}")
 
     # ------------------------
     # Exponent difference
@@ -111,24 +115,24 @@ def main(num1, num2, num3, num4, monitor = None):
     #       | 000..........000 | packed_mantissa[i] | 000...............0GR |  sticky bits  |
     #        <-   shifts[i]  -> <-         p      -> <-  2p+3-shifts[i]   -> <-  up to p  ->
 
-    alignment_mask = (1 << ALIGNMENT_WIDTH) - 1
-    sticky_mask = (1 << STICKY_BITS) - 1
+    ALIGNMENT_MASK  = (1 << ALIGNMENT_WIDTH) - 1
+    STICKY_MASK     = (1 << STICKY_BITS) - 1
     aligned_mantisas_w_sticky = [
-        ((implicit_mantisas[i] << EXTENDED_PRECISION) >> shifts[i]) & alignment_mask
+        ((implicit_mantisas[i] << ALIGNMENT_PRECISION) >> shifts[i]) & ALIGNMENT_MASK
         for i in range(len(implicit_mantisas))
     ]
 
-    sticky_buses = [am & sticky_mask for am in aligned_mantisas_w_sticky]
-    sticky_bits = [1 if stk_bus != 0 else 0 for stk_bus in sticky_buses]
+    sticky_buses = [ (am & STICKY_MASK) for am in aligned_mantisas_w_sticky]
+    sticky_bits  = [  1 if stk_bus != 0 else 0 for stk_bus in sticky_buses ]
 
     aligned_mantisas = [am >> STICKY_BITS for am in aligned_mantisas_w_sticky]
 
     print("Mantisas alineadas:")
     for i, value in enumerate(aligned_mantisas):
-        print(f"  {i+1}: {pp_bits_spaced(value, EXTENDED_PRECISION)} (sticky bit: {sticky_bits[i]})")
+        print(f"  {i+1}: {pp_bits_spaced(value, ALIGNMENT_PRECISION)} (sticky bit: {sticky_bits[i]})")
     print("\n"+"-"*50+"\n")
 
-    monitor.record("aligned_mantisas", f"{pp_bits_bus(aligned_mantisas, EXTENDED_PRECISION)}")
+    monitor.record("aligned_mantisas", f"{pp_bits_bus(aligned_mantisas, ALIGNMENT_PRECISION)}")
     monitor.record("sticky_bits", f"{pp_bits_bus(sticky_bits, 1)}")
 
     # ------------------------
@@ -136,7 +140,7 @@ def main(num1, num2, num3, num4, monitor = None):
     # ------------------------
 
     suma_mantisas = 0
-    mantisas_twos_complement_w_ovf = twos_complement(aligned_mantisas, signos_cambiados, EXTENDED_PRECISION)
+    mantisas_twos_complement_w_ovf = twos_complement(aligned_mantisas, signos_cambiados, ALIGNMENT_PRECISION)
 
     monitor.record("mantisas_twos_comp_w_ovf", f"{pp_bits_bus(mantisas_twos_complement_w_ovf, INTERNAL_PRECISION)}")
 
@@ -164,7 +168,7 @@ def main(num1, num2, num3, num4, monitor = None):
             monitor   = monitor
         )
 
-    monitor.record("LZA_zero_count", f"{pp_bits(lzcounter, INTERNAL_PRECISION.bit_length())}")
+    monitor.record("LZA_zero_count", f"{pp_bits(lzcounter, LZC_WIDTH)}")
     monitor.record("LZA_X",          f"{pp_bits(sum_ovf, 1)}")
     monitor.record("LZA_Y",          f"{pp_bits(one_bit_less_error, 1)}")
 
@@ -182,9 +186,9 @@ def main(num1, num2, num3, num4, monitor = None):
     monitor.record("final_sign",      f"{pp_bits(final_sign, 1)}")
 
     if (is_sum_negative):
-        abs_suma_mantissas = ((~suma_mantisas) & ((1 << INTERNAL_PRECISION) - 1)) + 1
+        abs_suma_mantissas = (~ suma_mantisas ) + 1
     else:
-        abs_suma_mantissas = suma_mantisas
+        abs_suma_mantissas =    suma_mantisas
     
     enable_flush    = False
     max_exp         = exponentes[shifts.index(0)]
@@ -194,22 +198,22 @@ def main(num1, num2, num3, num4, monitor = None):
 
     if tentative_exp >= 1:
         # resultado normal
-        shift_amount = actual_lzcounter - 1
-        exp_post_norm = tentative_exp - 1
-        enable_flush = False
+        shift_amount     = actual_lzcounter - 1
+        exp_post_norm    = tentative_exp - 1
+        enable_flush     = False
         is_normal_result = True
 
     else:
         # resultado subnormal o cero
         if FTZ_EN:
-            enable_flush = True
-            shift_amount = 0
+            enable_flush  = True
+            shift_amount  = 0
             exp_post_norm = 0
 
         else:
-            enable_flush = False
+            enable_flush  = False
             exp_post_norm = 0
-            shift_amount = eff_exp + SIGN_OVF_BITS - 1
+            shift_amount  = eff_exp + SIGN_OVF_BITS - 1
 
     if enable_flush:
         normalized_mantisa = 0
@@ -228,41 +232,41 @@ def main(num1, num2, num3, num4, monitor = None):
     print(f"    Mantisa absoluta:    {pp_bits_spaced(abs_suma_mantissas, INTERNAL_PRECISION)}")
     print(f"    Mantisa normalizada: {pp_bits_spaced(normalized_mantisa, INTERNAL_PRECISION)}\n")
 
+    print(f"Normalizacion exponente:")
+    print(f"    Exponente maximo:             {max_exp}")
+    print(f"    Exponente post-normalizacion: {exp_post_norm}")
+    print(f"    Flush to zero:                {(enable_flush and FTZ_EN)}")
+    print("\n"+"-"*50+"\n")
+
     monitor.record("mantisa_sum"        ,f"{pp_bits(suma_mantisas     , INTERNAL_PRECISION)}")
     monitor.record("mantisa_abs"        ,f"{pp_bits(abs_suma_mantissas, INTERNAL_PRECISION)}")
     monitor.record("mantisa_normalized" ,f"{pp_bits(normalized_mantisa, INTERNAL_PRECISION)}")
-
-    # encontre error en caso de dos maximos exponentes, ya que me dio como exponente final 31, esto en FP16 es +Inf
 
     monitor.record("max_exp",       f"{pp_bits(max_exp,   5)}")
     monitor.record("exp_post_norm", f"{pp_bits(exp_post_norm, 6)}")
     monitor.record("FTZ",           f"{pp_bits(enable_flush, 1)}")
 
-    print(f"Normalizacion exponente:")
-    print(f"    Exponente maximo: {max_exp}")
-    print(f"    Exponente post-normalizacion: {exp_post_norm}")
-    print(f"    Flush to zero: {(enable_flush and FTZ_EN)}")
-    print("\n"+"-"*50+"\n")
-
     # ------------------------
     # Rounding
     # ------------------------
 
-    fraction_lsb = EXTENDED_PRECISION + 2 - MAN_BITS
-    guard_index = fraction_lsb - 1
-    abs_val_masked = (normalized_mantisa >> fraction_lsb) & ((1 << MAN_BITS) - 1)
-    g_bit = (normalized_mantisa >> guard_index) & 1
-    s_bit = 1 if (normalized_mantisa & ((1 << guard_index) - 1)) != 0 else 0
+    FRACTION_LSB   = INTERNAL_PRECISION - 1 - MAN_BITS
+    GUARD_INDEX    = FRACTION_LSB - 1
+    GUARD_MASK     = ((1 << GUARD_INDEX) - 1)
+
+    abs_val_masked = (normalized_mantisa >> FRACTION_LSB) & MAN_MASK
+    g_bit          = (normalized_mantisa >> GUARD_INDEX) & 1
+    s_bit          = 1 if (normalized_mantisa & GUARD_MASK) != 0 else 0
 
     # or the sticky bits generated when aligning and the one of the normalized value
     RS_bits = (g_bit << 1) | (s_bit | any(sticky_bits))
 
-    abs_rounded, exact_zero, rounded_sign = round(
-            abs_value=abs_val_masked,
-            abs_mask=(1 << (MAN_BITS + 1)) - 1,
-            RS_bits=RS_bits,
-            sign=final_sign,
-            effective_subtraction=eff_substraction
+    abs_rounded, exact_zero, rounded_sign = round (
+            abs_value             = abs_val_masked            ,
+            abs_mask              = (1 << (MAN_BITS + 1)) - 1 ,
+            RS_bits               = RS_bits                   ,
+            sign                  = final_sign                ,
+            effective_subtraction = eff_substraction
         )
     
     round_ovf = abs_rounded & (1 << MAN_BITS)
@@ -274,7 +278,7 @@ def main(num1, num2, num3, num4, monitor = None):
     
     monitor.record("final_exp",  f"{pp_bits(exp_final, 6)}")
 
-    result_is_inf = exp_final > 30
+    result_is_inf = exp_final > (EXP_MASK - 1)
 
     monitor.record("abs_rounded", f"{        pp_bits(abs_rounded, 10)  }")
     monitor.record("round_ovf", f"{          pp_bits(round_ovf, 1)     }")
@@ -297,15 +301,16 @@ def main(num1, num2, num3, num4, monitor = None):
     # ------------------------
     # casos especiales 
     # ------------------------
+
     special_cases_result = special_cases_handling(nums_info, result_is_inf, rounded_sign)
 
     # ------------------------
     # packing y generacion de resultado final
     # ------------------------
 
-    result  = rounded_sign << (EXP_BITS + MAN_BITS)
-    result |= (exp_final & 0x1F)<< MAN_BITS
-    result |= (abs_rounded & ((1 << MAN_BITS) - 1))
+    result  =  rounded_sign             << (EXP_BITS + MAN_BITS)
+    result |= (exp_final   & EXP_MASK ) << MAN_BITS
+    result |= (abs_rounded & MAN_MASK )
 
 
     if(special_cases_result != None):

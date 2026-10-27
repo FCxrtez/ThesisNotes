@@ -1,33 +1,19 @@
-`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 07/02/2026 05:47:57 PM
-// Design Name: 
-// Module Name: fpnew_reduction_LZA_tree
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Author       : Francisco Cortez
+// Create Date  : 07/02/2026 05:47:57 PM
+// Module Name  : fpnew_reduction_LZA_tree
 //////////////////////////////////////////////////////////////////////////////////
 
 import tb_pkg::*;
 
-module fpnew_reduction_LZA_tree #(
-    parameter int  WIDTH = 37,
-    parameter type String_type = logic
-)(
-    input  String_type g_string_i,
-    output Tree_node_t root_o
-);
+module fpnew_reduction_LZA_tree
+# (
+    parameter int           WIDTH       = 37        ,
+    parameter type          String_type = logic
+)   (
+    input  String_type      g_string_i              ,
+    output Tree_node_t      root_o
+) ;
 
     /// Tree depth and width
     localparam int PADDED_INPUTS = 1 <<($clog2(WIDTH));
@@ -39,10 +25,10 @@ module fpnew_reduction_LZA_tree #(
         // Input driven nodes
         // i [=< \ <] WIDTH+1?
         for(int i = 0 ; i < WIDTH ; i = i + 1) begin
-            tree_grid[0][i].z = g_string_i.z[i];
-            tree_grid[0][i].p = g_string_i.p[i];
-            tree_grid[0][i].n = g_string_i.n[i];
-            tree_grid[0][i].y = 0;
+            tree_grid[ 0 ][ i ].z = g_string_i.z[ i ];
+            tree_grid[ 0 ][ i ].p = g_string_i.p[ i ];
+            tree_grid[ 0 ][ i ].n = g_string_i.n[ i ];
+            tree_grid[ 0 ][ i ].y = 0;
         end
         
         // Neutral nodes
@@ -70,6 +56,6 @@ module fpnew_reduction_LZA_tree #(
         end
     endgenerate
 
-    assign root_o = tree_grid[NUM_STAGES-1][0];
+    assign root_o = tree_grid[NUM_STAGES - 1 ][ 0 ];
 
 endmodule

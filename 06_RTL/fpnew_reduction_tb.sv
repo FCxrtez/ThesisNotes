@@ -28,7 +28,7 @@ module fpnew_reduction_tb();
   // (Adjust these to match your higher hierarchy as needed)
   // ---------------------------------------------------------
   parameter fpnew_pkg::fp_format_e   FpFormat      = fpnew_pkg::fp_format_e'('d2); //FP16
-  parameter int unsigned             Width         = 64;
+  parameter int unsigned             Width         = TB_INPUT_WIDTH;
   parameter int unsigned             NumPipeRegs   = 0;
   parameter fpnew_pkg::pipe_config_t PipeConfig    = fpnew_pkg::BEFORE;
   parameter type                     TagType       = logic;
@@ -75,104 +75,108 @@ module fpnew_reduction_tb();
   // 3. DUT Instantiation
   // ---------------------------------------------------------
   fpnew_reduction #(
-      .FpFormat      (FpFormat),
-      .Width         (Width),
-      .NumPipeRegs   (NumPipeRegs),
-      .PipeConfig    (PipeConfig),
-      .TagType       (TagType),
-      .AuxType       (AuxType),
-      .EnableVectors (EnableVectors)
+      .FpFormat           (  FpFormat              ),
+      .Width              (  Width                 ),
+      .NumPipeRegs        (  NumPipeRegs           ),
+      .PipeConfig         (  PipeConfig            ),
+      .TagType            (  TagType               ),
+      .AuxType            (  AuxType               ),
+      .EnableVectors      (  EnableVectors         ),
+      .AlignmentPrecision ( TB_ALIGNMENT_PRECISION )
   ) dut_reduction (
-      .clk_i           (clk_i),
-      .rst_ni          (rst_ni),
-      .operands_i      (operands_i),
-      .is_boxed_i      (is_boxed_i),
-      .rnd_mode_i      (rnd_mode_i),
-      .op_i            (op_i),
-      .op_mod_i        (op_mod_i),
-      .tag_i           (tag_i),
-      .mask_i          (mask_i),
-      .aux_i           (aux_i),
-      .in_valid_i      (in_valid_i),
-      .in_ready_o      (in_ready_o),
-      .flush_i         (flush_i),
-      .result_o        (result_o),
-      .status_o        (status_o),
-      .extension_bit_o (extension_bit_o),
-      .tag_o           (tag_o),
-      .aux_o           (aux_o),
-      .out_valid_o     (out_valid_o),
-      .out_ready_i     (out_ready_i),
-      .busy_o          (busy_o),
-      .reg_ena_i       (reg_ena_i),
-      .early_valid_o   (early_valid_o)
+      .clk_i              (  clk_i                 ),
+      .rst_ni             (  rst_ni                ),
+      .operands_i         (  operands_i            ),
+      .is_boxed_i         (  is_boxed_i            ),
+      .rnd_mode_i         (  rnd_mode_i            ),
+      .op_i               (  op_i                  ),
+      .op_mod_i           (  op_mod_i              ),
+      .tag_i              (  tag_i                 ),
+      .mask_i             (  mask_i                ),
+      .aux_i              (  aux_i                 ),
+      .in_valid_i         (  in_valid_i            ),
+      .in_ready_o         (  in_ready_o            ),
+      .flush_i            (  flush_i               ),
+      .result_o           (  result_o              ),
+      .status_o           (  status_o              ),
+      .extension_bit_o    (  extension_bit_o       ),
+      .tag_o              (  tag_o                 ),
+      .aux_o              (  aux_o                 ),
+      .out_valid_o        (  out_valid_o           ),
+      .out_ready_i        (  out_ready_i           ),
+      .busy_o             (  busy_o                ),
+      .reg_ena_i          (  reg_ena_i             ),
+      .early_valid_o      (  early_valid_o         )
   );
 
   /// ---------------------------------------------------------
   /// Enviroment hanlder
   /// ---------------------------------------------------------
 
-  localparam NUM_TEST_VECTORS = 1;
-  TestBenchEnv #(.NUM_TEST_VEC(NUM_TEST_VECTORS)) env;
+  localparam NUM_TEST_VECTORS = 1                     ;
+  TestBenchEnv #(.NUM_TEST_VEC(NUM_TEST_VECTORS)) env ;
   
-  int curr_tv; // Current test vector counter
+  int curr_tv                                         ; // Current test vector counter
 
   // ---------------------------------------------------------
   // 4. Basic Clock Generation
   // ---------------------------------------------------------
-  initial begin : clk_generation
-      clk_i = 0;
-      // Generates a clock with a period of 10 time units
-      forever #5 clk_i = ~clk_i; 
+  initial
+  begin : clk_generation
+    clk_i = 0;
+    // Generates a clock with a period of 10 time units
+    forever #5 clk_i = ~clk_i; 
   end
 
   // ---------------------------------------------------------
   // Object and Signals init
   // ---------------------------------------------------------
 
-  initial begin : signals_driver
-      rst_ni              = 0;
-      in_valid_i          = 0;
-      operands_i          = '0;
-      is_boxed_i          = '0;
-      rnd_mode_i          = fpnew_pkg::roundmode_e'(0);
-      op_i                = fpnew_pkg::operation_e'(0);
-      op_mod_i            =  0;
-      tag_i               = '0;
-      mask_i              = '0;
-      aux_i               = '0;
-      flush_i             =  0;
-      curr_tv             =  0;
+  initial
+  begin : signals_driver
+      rst_ni              =  0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      in_valid_i          =  0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      operands_i          = '0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      is_boxed_i          = '0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      rnd_mode_i          = fpnew_pkg::roundmode_e'(0)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ;
+      op_i                = fpnew_pkg::operation_e'(0)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ;
+      op_mod_i            =  0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      tag_i               = '0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      mask_i              = '0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      aux_i               = '0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      flush_i             =  0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
+      curr_tv             =  0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ;
 
-      env = new();
-      env.load_all_vectors();
+      env = new()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ;
+      env.load_all_vectors()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ;
       $display("ENV[0] \n\tinput=%b \n\tsigns=%b \n\texponents=%b \n\tmantisas=%b \n\timplicit=%b \n\tshifts=%b \n\tis_max=%b \n\txor_signos=%b \n\taligned=%b \n\tsticky=%b \n\ttwos_comp=%b \n\tsave=%b \n\tcarry=%b \n\tv=%b \n\tlza_F=%b \n\tlza_Gp_p=%b \n\tlza_Gp_n=%b \n\tlza_Gp_z=%b \n\tlza_Gn_p=%b \n\tlza_Gn_n=%b \n\tlza_Gn_z=%b \n\tlza_zero_count=%b \n\tlza_X=%b \n\tlza_Y=%b \n\tmantissa_sum=%b \n\tmantissa_abs=%b \n\tmantissa_normalized=%b \n\tis_sum_negative=%b \n\tfinal_sign=%b \n\tmax_exp=%b \n\tfinal_exp=%b \n\toutput=%b", env.input_vectors.assert_data[0], env.signos_a.assert_data[0], env.exponentes_a.assert_data[0], env.mantisas_a.assert_data[0], env.implicit_mantisas_a.assert_data[0], env.shifts_a.assert_data[0], env.is_max_a.assert_data[0], env.xor_signos_a.assert_data[0], env.aligned_mantisas_a.assert_data[0], env.sticky_bits_a.assert_data[0], env.mantisas_twos_comp_w_ovf_a.assert_data[0], env.save_a.assert_data[0], env.carry_a.assert_data[0], env.v_a.assert_data[0], env.lza_F_a.assert_data[0], env.lza_Gp_p_a.assert_data[0], env.lza_Gp_n_a.assert_data[0], env.lza_Gp_z_a.assert_data[0], env.lza_Gn_p_a.assert_data[0], env.lza_Gn_n_a.assert_data[0], env.lza_Gn_z_a.assert_data[0], env.lza_zero_count_a.assert_data[0], env.lza_X_a.assert_data[0], env.lza_Y_a.assert_data[0], env.mantissa_sum_a.assert_data[0], env.mantissa_abs_a.assert_data[0], env.mantissa_normalized_a.assert_data[0], env.is_sum_negative_a.assert_data[0], env.final_sign_a.assert_data[0], env.max_exp_a.assert_data[0], env.final_exp_a.assert_data[0], env.output_a.assert_data[0]);
 
-      #20;
-      rst_ni = 1;
-      #10;
+      #20                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ;
+      rst_ni = 1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ;
+      #10                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ;
 
       // drive test vectors
-      for (int i = 0; i < NUM_TEST_VECTORS; i++) begin : run_test_vectors
-          @(posedge clk_i);
+      for (int i = 0; i < NUM_TEST_VECTORS; i++)
+      begin : run_test_vectors
+          @(posedge clk_i)                                        ;
 
-          in_valid_i          <= 1;
-          operands_i[0]       <= env.input_vectors.assert_data[i];
-          is_boxed_i          <= 4'b1111; 
-          rnd_mode_i          <= fpnew_pkg::roundmode_e'(0); 
-          op_i                <= fpnew_pkg::operation_e'('d16); 
-          op_mod_i            <= 0; 
-          tag_i               <= i; // Use index as tag for tracking
-          mask_i              <= '1; // Enable all lanes for reduction
-          aux_i               <= '0; 
-          in_valid_i          <= 1;
-          curr_tv             <= i;
+          in_valid_i          <= 1                                ;
+          operands_i[0]       <= env.input_vectors.assert_data[i] ;
+          is_boxed_i          <= 4'b1111                          ; 
+          rnd_mode_i          <= fpnew_pkg::roundmode_e'(0)       ; 
+          op_i                <= fpnew_pkg::operation_e'('d16)    ; 
+          op_mod_i            <= 0                                ; 
+          tag_i               <= i                                ; // Use index as tag for tracking
+          mask_i              <= '1                               ; // Enable all lanes for reduction
+          aux_i               <= '0                               ; 
+          in_valid_i          <= 1                                ;
+          curr_tv             <= i                                ;
     
-          @(posedge clk_i);
-          in_valid_i    <= 0;
+          @(posedge clk_i)                                        ;
+          in_valid_i    <= 0                                      ;
       end
 
-      in_valid_i <= 0;
+      in_valid_i <= 0                                             ;
   end
 
   always @(posedge clk_i) begin : loggin_logic
@@ -258,7 +262,7 @@ module fpnew_reduction_tb();
       env.out_log.log_msg($sformatf("\tone bit less error: %b", dut_reduction.i_lza.Y_o));
       env.out_log.log_msg($sformatf("\toverflow flag: %b\n", dut_reduction.i_lza.X_o));
 
-      `ASSERT_SIGNAL(env.is_sum_negative_a,     dut_reduction.mantissa_sum[3 * 11 + 2])
+      `ASSERT_SIGNAL(env.is_sum_negative_a,     dut_reduction.mantissa_sum[dut_reduction.INTERNAL_PRECISION - 1])
       `ASSERT_SIGNAL(env.mantissa_sum_a,        dut_reduction.mantissa_sum)
       `ASSERT_SIGNAL(env.mantissa_abs_a,        dut_reduction.mantissa_abs)
 
@@ -266,7 +270,7 @@ module fpnew_reduction_tb();
       `ASSERT_SIGNAL(env.final_sign_a,          dut_reduction.final_sign)
 
       env.out_log.log_msg("Mantissa normalization:");
-      env.out_log.log_msg($sformatf("\tresult is negative: %b", dut_reduction.mantissa_sum[3 * 11 + 2]));
+      env.out_log.log_msg($sformatf("\tresult is negative: %b", dut_reduction.mantissa_sum[dut_reduction.INTERNAL_PRECISION - 1]));
       env.out_log.log_msg($sformatf("\tfinal sign: %b", dut_reduction.final_sign));
       env.out_log.log_msg($sformatf("\tsigned mantissa: %b", dut_reduction.mantissa_sum));
       env.out_log.log_msg($sformatf("\tabsolute value mantissa: %b", dut_reduction.mantissa_abs));
@@ -282,7 +286,7 @@ module fpnew_reduction_tb();
       env.out_log.log_msg($sformatf("\tFlush to zero signal: %b", dut_reduction.enable_flush));
       env.out_log.log_msg($sformatf("\tnormalized mantissa: %b", dut_reduction.mantissa_norm));
 
-      `ASSERT_SIGNAL(env.abs_rounded_a,  dut_reduction.rounded_mantissa)
+      `ASSERT_SIGNAL(env.abs_rounded_a,  dut_reduction.rounded_mantissa[TB_MAN_BITS-1:0])
       `ASSERT_SIGNAL(env.round_ovf_a,    dut_reduction.round_ovf)
       `ASSERT_SIGNAL(env.rounded_sign_a, dut_reduction.sign_after_round)
 
@@ -305,8 +309,8 @@ module fpnew_reduction_tb();
 
       env.out_log.log_msg("Result packing:");
       env.out_log.log_msg($sformatf("\tsign:     %b", dut_reduction.sign_after_round));
-      env.out_log.log_msg($sformatf("\texponent: %b", dut_reduction.final_exp[4:0]));
-      env.out_log.log_msg($sformatf("\tmantissa: %b", dut_reduction.rounded_mantissa[9:0]));
+      env.out_log.log_msg($sformatf("\texponent: %b", dut_reduction.final_exp[TB_EXP_BITS-1:0]));
+      env.out_log.log_msg($sformatf("\tmantissa: %b", dut_reduction.rounded_mantissa[TB_MAN_BITS-1:0]));
 
     end
   end
