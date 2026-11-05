@@ -84,7 +84,7 @@ def compute_ulp_diff(test_bits, golden_bits, exact_match):
 
     return ulp_arr_exact_match
 
-def main(num_test_vectors=1000, quiet=False):
+def main(num_test_vectors=10000, quiet=False):
     out_fn = "bench_result.txt"
 
     gen_inputs_fun      (    num_test_vectors, verbose = quiet  )
@@ -207,7 +207,7 @@ def main(num_test_vectors=1000, quiet=False):
 
     test_vectors = np.array(load_vectors(ABS_PATH_INP_VEC))
 
-    mod_exact_match_error_mask = ~ metrics['mod']['exact_match']
+    mod_exact_match_error_mask = metrics['mod']['exact_match']
     error_data_per_case = {}
 
     for c in unique_cases:

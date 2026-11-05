@@ -115,14 +115,14 @@ def simulate_reduction_tree(leaf_nodes):
                 # Since you appended from i=0 (LSB) up to MSB,
                 # the higher index (j+1) represents the more significant bits (Left branch).
                 # The lower index (j) represents the less significant bits (Right branch).
-                left_node = current_layer[j + 1]
+                left_node  = current_layer[j + 1]
                 right_node = current_layer[j]
 
 
-                z_ = left_node[0] & right_node[0]
-                p_ = (left_node[0] & right_node[1]) | (left_node[1] & right_node[0])
-                n_ = left_node[2] | (left_node[0] & right_node[2])
-                y_ = left_node[3] | (left_node[0] & right_node[3]) | (left_node[1] & right_node[2])
+                z_ =   left_node[0] & right_node[0]
+                p_ =  (left_node[0] & right_node[1]) | (left_node[1]  & right_node[0])
+                n_ =   left_node[2] | (left_node[0]  & right_node[2])
+                y_ =   left_node[3] | (left_node[0]  & right_node[3]) | (left_node[1] & right_node[2] )
 
 
                 next_layer.append((z_, p_, n_, y_))
