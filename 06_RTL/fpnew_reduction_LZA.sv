@@ -16,7 +16,7 @@ module fpnew_reduction_LZA # (
         logic [ WIDTH + 1 - 1 : 0 ] p;
         logic [ WIDTH + 1 - 1 : 0 ] n;
         logic [ WIDTH + 1 - 1 : 0 ] z;
-    } G_struct;
+    } G_struct ;
 
     // Reduction tree parameters
     localparam int PADDED_INPUTS = 1 << $clog2(WIDTH +1)       ;
@@ -87,7 +87,7 @@ module fpnew_reduction_LZA # (
     assign G_ex =  {G    , 1'b0}                          ;
 
     assign Gp.p =   G_ex | V_i                          ;
-    assign Gp.n =  (Z_ex | {WIDTH-1'b0,~V_i}) & T_ex    ;
+    assign Gp.n =  (Z_ex | {{WIDTH{1'b0}},~V_i}) & T_ex ;
     assign Gp.z = ~(Gp.p | Gp.n)                        ;
 
     assign Gn.p =   Z_ex | 1'b1                         ;
@@ -104,7 +104,7 @@ module fpnew_reduction_LZA # (
     ) ;
 
     fpnew_reduction_LZA_tree # (
-        .WIDTH          (   WIDTH       ),
+        .WIDTH          (   WIDTH + 1   ),
         .String_type    (   G_struct    )
     ) i_neg_tree               (
         .g_string_i     (   Gn          ),
@@ -112,7 +112,7 @@ module fpnew_reduction_LZA # (
     ) ;
 
     // one bit less error
-    assign Y_o = (V_i & (pos_root.y | pos_root.n)) | (~V_i & (neg_root.n & Z[WIDTH-1]));
+    assign Y_o = (V_i & (pos_root.y | neg_root.y)) | (( ~V_i ) & (pos_root.n & Z[WIDTH-1]));
 
     // Overflow flag - not used
     assign X_o = ~V_i & pos_root.p;

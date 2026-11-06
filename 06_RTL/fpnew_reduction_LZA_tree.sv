@@ -23,7 +23,6 @@ module fpnew_reduction_LZA_tree
 
     always_comb begin : tree_initializing
         // Input driven nodes
-        // i [=< \ <] WIDTH+1?
         for(int i = 0 ; i < WIDTH ; i = i + 1) begin
             tree_grid[ 0 ][ i ].z = g_string_i.z[ i ];
             tree_grid[ 0 ][ i ].p = g_string_i.p[ i ];

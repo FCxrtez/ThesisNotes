@@ -306,7 +306,7 @@ module fpnew_reduction #(
     end
   end
 
-  assign mantissa_norm = enable_flush ? '0 : (mantissa_abs << shift_amount)                                                            ;
+  assign mantissa_norm = enable_flush ? {INTERNAL_PRECISION{1'b0}} : (mantissa_abs << shift_amount)                                     ;
   
   // ---------------
   // Rounding
@@ -383,7 +383,10 @@ module fpnew_reduction #(
       special_result        = neg_inf                                                                                                  ; 
     end
     else
-      special_result          = 1'b0                                                                                                   ;
+    begin
+      result_is_special     = 1'b0                                                                                                     ;
+      special_result        = '0                                                                                                       ;
+    end
   end
 
   // ---------------

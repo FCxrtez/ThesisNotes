@@ -1,13 +1,13 @@
 module fpnew_reduction_exp_align
 # (
     parameter int unsigned           Width              = 64, 
-    parameter fpnew_pkg::fp_format_e fp_format          = fpnew_pkg::fp_format_e'('d2),
-    parameter int unsigned           EXP_BITS           = fpnew_pkg::exp_bits(fp_format), // Number of bits in the exponent
+    parameter fpnew_pkg::fp_format_e fp_format          = fpnew_pkg::fp_format_e'('d2)                ,
+    parameter int unsigned           EXP_BITS           = fpnew_pkg::exp_bits(fp_format)              , // Number of bits in the exponent
     parameter int unsigned           NUM_OPERANDS       = fpnew_pkg::num_lanes(Width, fp_format, 1'b1),
-    parameter int unsigned           SHIFT_AMOUNT_WIDTH = $clog2(fpnew_pkg::max_exp_dif(fp_format)) // Max shift possible with FP16 is 30
+    parameter int unsigned           SHIFT_AMOUNT_WIDTH = $clog2(fpnew_pkg::max_exp_dif(fp_format))     // Max shift possible with FP16 is 30
 ) (
-    input  logic [NUM_OPERANDS - 1 : 0 ][EXP_BITS           - 1 : 0 ] exponents_i, // Biased exponents
-    output logic [NUM_OPERANDS - 1 : 0 ][SHIFT_AMOUNT_WIDTH - 1 : 0 ] shifts_o,    // Alignment amounts
+    input  logic [NUM_OPERANDS - 1 : 0 ][EXP_BITS           - 1 : 0 ] exponents_i , // Biased exponents
+    output logic [NUM_OPERANDS - 1 : 0 ][SHIFT_AMOUNT_WIDTH - 1 : 0 ] shifts_o    , // Alignment amounts
     output logic                        [EXP_BITS           - 1 : 0 ] max_exp_o
 ) ;
 
@@ -84,9 +84,11 @@ module fpnew_reduction_exp_align
       
       default:
         begin
-          $display("WARNING: no max found during exp alingment");
+//          $display("WARNING: no max found during exp alingment");
           shifts_o = '0;
         end
     endcase
   end
+  
+  assign max_exp_o = max_exp;
 endmodule

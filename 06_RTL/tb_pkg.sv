@@ -42,11 +42,15 @@ localparam int unsigned TB_NORMALIZED_EXPONENT_WIDTH = TB_EXP_BITS + 1;
 
 // Macro definitions
 `define ASSERT_SIGNAL(env_obj, dut_sig) \
-    assert(env_obj.assert_data[curr_tv] == dut_sig) \
+    assert(env_obj.assert_data[tv] == dut_sig) \
          env.out_log.log_msg($sformatf("Assertion passed for %s", `"dut_sig`")); \
-    else env.out_log.log_msg( \
+    else \
+    begin \
+        env.out_log.log_msg( \
         $sformatf("Assertion failed for %s at cycle %0d:\n\tExpected: %b\n\tResult:   %b", \
-                  `"dut_sig`", curr_tv, env_obj.assert_data[curr_tv], dut_sig) \
+                  `"dut_sig`", tv, env_obj.assert_data[curr_tv], dut_sig) \
+        current_vector_failed = 1'b1; \
+    end \
     );
 
 
@@ -285,7 +289,7 @@ class TestBenchEnv #(parameter int NUM_TEST_VEC = 1);
         this.out_log                        = new(                                      )                               ;
     endfunction
 
-    function void load_all_vectors()    ;
+    function void load_all_vectors()                                                                                    ;
         this.input_vectors.load_data()                                                                                  ;
         this.signos_a.load_data()                                                                                       ;
         this.exponentes_a.load_data()                                                                                   ;
