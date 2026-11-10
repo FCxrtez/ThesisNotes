@@ -60,7 +60,7 @@ module fpnew_reduction #(
   localparam int unsigned ALIGNMENT_WIDTH     = ALIGNMENT_PRECISION + STICKY_BITS                                                      ;
   localparam int unsigned SHIFT_AMOUNT_WIDTH  = $clog2(fpnew_pkg::max_exp_dif(FpFormat))                                               ;
   localparam int unsigned LZC_WIDTH           = $clog2(INTERNAL_PRECISION + 1)                                                         ;
-  localparam bit          FTZ_EN               = 1'b0                                                                                  ;
+  localparam bit          FTZ_EN              = 1'b0                                                                                   ;
 
   // ----------
   // Handshake signals
@@ -185,7 +185,7 @@ module fpnew_reduction #(
   assign any_sticky_bit = | (sticky_before_add)                                                                                        ;
 
   // ---------------------------------------------
-  // Sign change (MSB-side operand as anchor)
+  // Sign change (MSB operand as anchor)
   // ---------------------------------------------
 
   logic [NUM_OPERANDS-1:0] inversion_signs                                                                                             ;
@@ -314,7 +314,7 @@ module fpnew_reduction #(
   logic                         sign_after_round                                                                                       ;
   logic                         exact_zero                                                                                             ;
   logic                         round_ovf                                                                                              ;
-  logic [ 1               : 0 ] rs_bits                                                                                                ;
+  logic [1                : 0 ] rs_bits                                                                                                ;
   logic [MAN_BITS     - 1 : 0 ] abs_mantissa                                                                                           ;
   logic [MAN_BITS + 1 - 1 : 0 ] rounded_mantissa                                                                                       ;
   
@@ -360,6 +360,7 @@ module fpnew_reduction #(
   // ---------------
   
   logic                         result_is_special                                                                                      ;
+  logic [FP_WIDTH     - 1 : 0 ] special_result                                                                                         ;
   logic [MAN_BITS + 1 - 1 : 0 ] inf_check_mantissa                                                                                     ;
   logic [FP_WIDTH     - 1 : 0 ] canonical_qnan_bin  = 16'h7E00                                                                         ;
   logic [FP_WIDTH     - 1 : 0 ] pos_inf             = 16'h7C00                                                                         ;
@@ -394,7 +395,6 @@ module fpnew_reduction #(
   // ---------------
 
   logic [FP_WIDTH - 1 : 0 ] result                                                                                                     ;
-  logic [FP_WIDTH - 1 : 0 ] special_result                                                                                             ;
 
   assign result   = (result_is_special) ? special_result 
                                         : {sign_after_round, final_exp[ EXP_BITS - 1 : 0 ], rounded_mantissa[ MAN_BITS - 1 : 0 ]}      ;

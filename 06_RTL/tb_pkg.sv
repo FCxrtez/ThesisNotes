@@ -21,24 +21,24 @@
 
 package tb_pkg;
 
-localparam fpnew_pkg::fp_format_e TB_FP_FORMAT       = fpnew_pkg::FP16;
-localparam int unsigned TB_MAN_BITS                  = fpnew_pkg::man_bits(TB_FP_FORMAT);
-localparam int unsigned TB_EXP_BITS                  = fpnew_pkg::exp_bits(TB_FP_FORMAT);
-localparam int unsigned TB_SIGN_BITS                 = 1;
-localparam int unsigned TB_FP_WIDTH                  = fpnew_pkg::fp_width(TB_FP_FORMAT);
-localparam int unsigned TB_NUM_OPERANDS              = 4;
-localparam int unsigned TB_INPUT_WIDTH               = TB_NUM_OPERANDS * TB_FP_WIDTH;
-localparam int unsigned TB_PRECISION_BITS            = TB_MAN_BITS + 1;
-localparam int unsigned TB_STICKY_BITS               = TB_PRECISION_BITS;
-localparam int unsigned TB_SIGN_OVF_BITS             = 3;
-localparam int unsigned TB_ALIGNMENT_PRECISION       = 3 * TB_PRECISION_BITS;
-localparam int unsigned TB_ALIGNMENT_WIDTH           = TB_ALIGNMENT_PRECISION + TB_STICKY_BITS;
-localparam int unsigned TB_INTERNAL_PRECISION        = TB_ALIGNMENT_PRECISION + TB_SIGN_OVF_BITS;
-localparam int unsigned TB_MAX_EXP_DIFF              = fpnew_pkg::max_exp_dif(TB_FP_FORMAT);
-localparam int unsigned TB_SHIFT_AMOUNT_WIDTH        = $clog2(TB_MAX_EXP_DIFF);
-localparam int unsigned TB_LZC_WIDTH                 = $clog2(TB_INTERNAL_PRECISION + 1);
-localparam int unsigned TB_LZA_STRING_WIDTH          = TB_INTERNAL_PRECISION + 1;
-localparam int unsigned TB_NORMALIZED_EXPONENT_WIDTH = TB_EXP_BITS + 1;
+localparam fpnew_pkg::fp_format_e TB_FP_FORMAT                  = fpnew_pkg::FP16                           ;
+localparam int unsigned           TB_MAN_BITS                   = fpnew_pkg::man_bits(TB_FP_FORMAT)         ;
+localparam int unsigned           TB_EXP_BITS                   = fpnew_pkg::exp_bits(TB_FP_FORMAT)         ;
+localparam int unsigned           TB_SIGN_BITS                  = 1                                         ;
+localparam int unsigned           TB_FP_WIDTH                   = fpnew_pkg::fp_width(TB_FP_FORMAT)         ;
+localparam int unsigned           TB_NUM_OPERANDS               = 4                                         ;
+localparam int unsigned           TB_INPUT_WIDTH                = TB_NUM_OPERANDS * TB_FP_WIDTH             ;
+localparam int unsigned           TB_PRECISION_BITS             = TB_MAN_BITS + 1                           ;
+localparam int unsigned           TB_STICKY_BITS                = TB_PRECISION_BITS                         ;
+localparam int unsigned           TB_SIGN_OVF_BITS              = 3                                         ;
+localparam int unsigned           TB_ALIGNMENT_PRECISION        = ( 3 * TB_PRECISION_BITS )                 ;
+localparam int unsigned           TB_ALIGNMENT_WIDTH            = TB_ALIGNMENT_PRECISION + TB_STICKY_BITS   ;
+localparam int unsigned           TB_INTERNAL_PRECISION         = TB_ALIGNMENT_PRECISION + TB_SIGN_OVF_BITS ;
+localparam int unsigned           TB_MAX_EXP_DIFF               = fpnew_pkg::max_exp_dif(TB_FP_FORMAT)      ;
+localparam int unsigned           TB_SHIFT_AMOUNT_WIDTH         = $clog2(TB_MAX_EXP_DIFF)                   ;
+localparam int unsigned           TB_LZC_WIDTH                  = $clog2(TB_INTERNAL_PRECISION + 1)         ;
+localparam int unsigned           TB_LZA_STRING_WIDTH           = TB_INTERNAL_PRECISION + 1                 ;
+localparam int unsigned           TB_NORMALIZED_EXPONENT_WIDTH  = TB_EXP_BITS + 1                           ;
 
 // Macro definitions
 `define ASSERT_SIGNAL(env_obj, dut_sig) \
@@ -343,33 +343,4 @@ class TestBenchEnv #(parameter int NUM_TEST_VEC = 1);
         this.output_a.load_data()                                                                                       ;
     endfunction
 endclass
-
-// LZA - Error detection definitions
-typedef struct packed {
-    logic z                                                                                                             ;
-    logic p                                                                                                             ;
-    logic n                                                                                                             ;
-    logic y                                                                                                             ;
-} Tree_node_t                                                                                                           ;
-
-function Tree_node_t gen_next_node(input Tree_node_t left, input Tree_node_t right)                                     ;
-    logic nxt_z                                                                                                         ;
-    logic nxt_p                                                                                                         ;
-    logic nxt_n                                                                                                         ;
-    logic nxt_y                                                                                                         ;
-    Tree_node_t next                                                                                                    ;
-
-    nxt_z  = left.z & right.z                                                                                           ;
-    nxt_p = (left.z & right.p) | (left.p & right.z)                                                                     ;
-    nxt_n = left.n | (left.z & right.n)                                                                                 ;
-    nxt_y = left.y | (left.z & right.y) | (left.p & right.n)                                                            ;
-
-    next.z = nxt_z                                                                                                      ;
-    next.p = nxt_p                                                                                                      ;
-    next.n = nxt_n                                                                                                      ;
-    next.y = nxt_y                                                                                                      ;
-
-    return next                                                                                                         ;
-endfunction
-
 endpackage : tb_pkg
