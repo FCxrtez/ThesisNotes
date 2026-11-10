@@ -214,7 +214,7 @@ def LZA(carry, save, signos, bit_width=36, monitor = None):
 
     print(f"Resultados LZA:")
     print(f"  Cantidad de ceros a la izquierda: {zeroes}")
-    print(f"  Señal de error X (overflow en suma): {X}")
+    print(f"  Señal de error X (one bit more): {X}")
     print(f"  Señal de error Y (one bit less): {Y}")
     print("\n" + "-" * 50 + "\n")
 
