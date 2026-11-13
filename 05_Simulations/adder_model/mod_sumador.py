@@ -23,6 +23,10 @@ EXP_MASK            = (1 << EXP_BITS) - 1
 LZC_WIDTH           = INTERNAL_PRECISION.bit_length()
 FTZ_EN              = 0
 
+# ------------------------
+# Main
+# ------------------------
+
 def main(num1, num2, num3, num4, monitor = None):
     """
     Only accepts floats, anything else will lead to undefined behaviour
@@ -31,11 +35,11 @@ def main(num1, num2, num3, num4, monitor = None):
     signos, exponentes, mantisas = [], [], []
     binary_nums = [float_to_bits(f) for f in [num1, num2, num3, num4]]
 
-    for i in binary_nums: 
+    for bin_n in binary_nums: 
         # [sign | exponent | mantissa]
-        signo     = (i >> (MAN_BITS + EXP_BITS)) & 0x1 # 1 bit
-        exponente = (i >>  MAN_BITS            ) & EXP_MASK
-        mantisa   =  i                           & MAN_MASK
+        signo     = (bin_n >> (MAN_BITS + EXP_BITS)) & 0x1
+        exponente = (bin_n >>  MAN_BITS            ) & EXP_MASK
+        mantisa   =  bin_n                           & MAN_MASK
 
         signos.append(signo)
         exponentes.append(exponente)
@@ -106,14 +110,13 @@ def main(num1, num2, num3, num4, monitor = None):
     # alineacion de mantisas
     # ------------------------
     # Comentarios sv:
-    #       Each addend is right-shifted according to the exponent difference. Up to p bits
-    #       are shifted out and compressed into a sticky bit.
+    #       Each addend is right-shifted according to the exponent difference.
     #       BEFORE THE EXPONENT SHIFT:
     #       | packed_mantissa[i] | 000..000 |
-    #        <-        p       -> <- 2p+3 ->
+    #        <-        p       -> <- 2p+7 ->
     #       AFTER THE SHIFT:
-    #       | 000..........000 | packed_mantissa[i] | 000...............0GR |  sticky bits  |
-    #        <-   shifts[i]  -> <-         p      -> <-  2p+3-shifts[i]   -> <-  up to p  ->
+    #       | 000..........000 | packed_mantissa[i] | 000...............000 
+    #        <-   shifts[i]  -> <-         p      -> <- 2p+7 - shifts[i] ->
 
     ALIGNMENT_MASK  = (1 << ALIGNMENT_WIDTH) - 1
     STICKY_MASK     = (1 << STICKY_BITS) - 1
@@ -259,7 +262,7 @@ def main(num1, num2, num3, num4, monitor = None):
     s_bit          = 1 if (normalized_mantisa & GUARD_MASK) != 0 else 0
 
     # or the sticky bits generated when aligning and the one of the normalized value
-    RS_bits = (g_bit << 1) | (s_bit | any(sticky_bits))
+    RS_bits = (g_bit << 1) |(s_bit)
 
     abs_rounded, exact_zero, rounded_sign = round (
             abs_value             = abs_val_masked            ,

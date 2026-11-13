@@ -9,7 +9,8 @@ import tb_pkg::*;
 module fpnew_reduction_LZA_tree
 # (
     parameter int           WIDTH       = 37        ,
-    parameter type          String_type = logic
+    parameter type          String_type = logic     ,
+    parameter type          Tree_node_t = logic     
 )   (
     input  String_type      g_string_i              ,
     output Tree_node_t      root_o
@@ -17,13 +18,12 @@ module fpnew_reduction_LZA_tree
 
     /// Tree depth and width
     localparam int PADDED_INPUTS = 1 <<($clog2(WIDTH));
-    localparam int NUM_STAGES = $clog2(PADDED_INPUTS)+1;
+    localparam int NUM_STAGES    = $clog2(PADDED_INPUTS)+1;
 
-    Tree_node_t tree_grid [NUM_STAGES][PADDED_INPUTS];
+    Tree_node_t tree_grid [ NUM_STAGES ] [ PADDED_INPUTS ];
 
     always_comb begin : tree_initializing
         // Input driven nodes
-        // i [=< \ <] WIDTH+1?
         for(int i = 0 ; i < WIDTH ; i = i + 1) begin
             tree_grid[ 0 ][ i ].z = g_string_i.z[ i ];
             tree_grid[ 0 ][ i ].p = g_string_i.p[ i ];
@@ -42,15 +42,29 @@ module fpnew_reduction_LZA_tree
 
     genvar stage, node;
     generate
-        for(stage = 1; stage < NUM_STAGES; stage++) begin : stage_reduction_loop
-            localparam  int NODES_IN_STAGE = PADDED_INPUTS >> stage;
+        for(stage = 1; stage < NUM_STAGES; stage++)
+        begin : stage_reduction_loop
 
-            for(node = 0; node < NODES_IN_STAGE; node++) begin
-                always_comb begin
-                    tree_grid[stage][node] = gen_next_node(
-                        tree_grid[stage-1][2*node+1], // left parent
-                        tree_grid[stage-1][2*node  ]  // right parent
-                    );
+            localparam int NODES_IN_STAGE = PADDED_INPUTS >> stage;
+
+            for(node = 0; node < NODES_IN_STAGE; node++)
+            begin
+                always_comb
+                begin : inline_next_node
+                    // left  parent = tree_grid[stage-1][2*node+1]
+                    // right parent = tree_grid[stage-1][2*node]
+                    
+                    tree_grid[stage][node].z =  tree_grid[stage-1][2*node+1].z & tree_grid[stage-1][2*node].z;
+                    
+                    tree_grid[stage][node].p = (tree_grid[stage-1][2*node+1].z & tree_grid[stage-1][2*node].p) | 
+                                               (tree_grid[stage-1][2*node+1].p & tree_grid[stage-1][2*node].z);
+                                               
+                    tree_grid[stage][node].n =  tree_grid[stage-1][2*node+1].n | 
+                                               (tree_grid[stage-1][2*node+1].z & tree_grid[stage-1][2*node].n);
+                                               
+                    tree_grid[stage][node].y =  tree_grid[stage-1][2*node+1].y | 
+                                               (tree_grid[stage-1][2*node+1].z & tree_grid[stage-1][2*node].y) | 
+                                               (tree_grid[stage-1][2*node+1].p & tree_grid[stage-1][2*node].n);
                 end
             end
         end

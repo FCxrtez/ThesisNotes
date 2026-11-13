@@ -72,7 +72,7 @@ def compute_ulp_diff(test_bits, golden_bits, exact_match):
 
     return ulp_arr_exact_match
 
-def main(num_test_vectors=1000, quiet=False):
+def main(num_test_vectors=10000, quiet=False):
     out_fn = "bench_result.txt"
 
     gen_inputs_fun      (    num_test_vectors, verbose = quiet  )

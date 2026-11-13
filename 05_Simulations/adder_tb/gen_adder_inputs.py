@@ -99,11 +99,6 @@ def gen_test_vectors(N: int, seed=1, verbose=True):
     rng = np.random.default_rng(seed=seed)
     test_suite, test_case = [], []
 
-    if ( N <= 10 ):
-        N = N * 10
-        if verbose:
-            print(f"[INFO] Generating {N} cases, must be at least 10")
-
     rnd_uniform_p                   =     0.4
     aling_stress_p                  =     0.2
     catastrophic_cancellation_p     =     0.2
@@ -165,6 +160,8 @@ def main(N = None, *, verbose: bool = False):
         i_num = args.num
     else:
         i_num = N
+
+    print(f"NUMBER OF TEST VECTORS: {N}")
 
     if i_num is None or i_num < 0:
         print("Error: --num must be a positive integer")
